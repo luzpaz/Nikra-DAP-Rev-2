@@ -50,8 +50,8 @@ class _CommandDapSolver:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon7.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Solver", "Run the analysis"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Solver", "Run the analysis.")}
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Solver_alias", "Run the analysis"),
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Solver_alias", "Run the analysis.")}
 
     #  -------------------------------------------------------------------------
     def IsActive(self):

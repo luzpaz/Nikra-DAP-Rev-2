@@ -42,9 +42,9 @@ class _CommandDapBody:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon3.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Body",
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Body_alias",
                                                      "Body Definition"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Body",
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Body_alias",
                                                     "Creates and defines a body for the DAP analysis")}
 
     #  -------------------------------------------------------------------------

@@ -23,9 +23,9 @@ class _CommandDapAnimation:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon8.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Animation",
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Animation_alias",
                                                      "Animate solution"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Animation",
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Animation_alias",
                                                     "Animates the motion of the moving bodies")}
 
     #  -------------------------------------------------------------------------

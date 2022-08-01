@@ -78,15 +78,15 @@ class DapWorkbench(Workbench):
         from DapPointSelection import _CommandDapPoint
 
         # Define which commands will be called with each command alias
-        FreeCADGui.addCommand("Dap_Container", _CommandDapContainer())
-        FreeCADGui.addCommand("Dap_Body", _CommandDapBody())
-        FreeCADGui.addCommand("Dap_Joint", _CommandDapJoint())
-        FreeCADGui.addCommand("Dap_Force", _CommandDapMaterial())
-        FreeCADGui.addCommand("Dap_Material", _CommandDapForce())
-        FreeCADGui.addCommand("Dap_Solver", _CommandDapSolver())
-        FreeCADGui.addCommand("Dap_Animation", _CommandDapAnimation())
-        FreeCADGui.addCommand("Dap_Plot", _CommandDapPlot())
-        FreeCADGui.addCommand("Dap_Point", _CommandDapPoint())
+        FreeCADGui.addCommand("Dap_Container_alias", _CommandDapContainer())
+        FreeCADGui.addCommand("Dap_Body_alias", _CommandDapBody())
+        FreeCADGui.addCommand("Dap_Joint_alias", _CommandDapJoint())
+        FreeCADGui.addCommand("Dap_Force_alias", _CommandDapMaterial())
+        FreeCADGui.addCommand("Dap_Material_alias", _CommandDapForce())
+        FreeCADGui.addCommand("Dap_Solver_alias", _CommandDapSolver())
+        FreeCADGui.addCommand("Dap_Animation_alias", _CommandDapAnimation())
+        FreeCADGui.addCommand("Dap_Plot_alias", _CommandDapPlot())
+        FreeCADGui.addCommand("Dap_Point_alias", _CommandDapPoint())
 
         # Create a toolbar with the DAP commands (icons)
         self.appendToolbar("Nikra-DAP Commands", self.MakeCommandList())
@@ -97,19 +97,19 @@ class DapWorkbench(Workbench):
     #  -------------------------------------------------------------------------
     def MakeCommandList(self):
         """ Define a list of our aliases for all the DAP functions
-        TODO: Add "Dap_Point" when it is implemented """
+        TODO: Add "Dap_Point_alias" when it is implemented """
 
-        return ["Dap_Container",
+        return ["Dap_Container_alias",
                 "Separator",
-                "Dap_Body",
-                "Dap_Joint",
-                "Dap_Material",
-                "Dap_Force",
+                "Dap_Body_alias",
+                "Dap_Joint_alias",
+                "Dap_Material_alias",
+                "Dap_Force_alias",
                 "Separator",
-                "Dap_Solver",
+                "Dap_Solver_alias",
                 "Separator",
-                "Dap_Animation",
-                "Dap_Plot",
+                "Dap_Animation_alias",
+                "Dap_Plot_alias",
                 ]
 
     #  -------------------------------------------------------------------------

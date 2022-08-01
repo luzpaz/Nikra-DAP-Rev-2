@@ -46,9 +46,9 @@ class _CommandDapForce:
             'Pixmap': os.path.join(DapTools.get_module_path(),
                                    "icons",
                                    "Icon6.png"),
-            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Force",
+            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Force_alias",
                                                  "Add Force"),
-            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Force",
+            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Force_alias",
                                                 "Creates and defines a force for the DAP analysis")}
 
     #  -------------------------------------------------------------------------

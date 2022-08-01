@@ -66,9 +66,9 @@ class _CommandDapContainer:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon2.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Container",
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Container_alias",
                                                      "New Dap Container"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Container",
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Container_alias",
                                                     "Creates a Dap solver container")}
 
     #  -------------------------------------------------------------------------

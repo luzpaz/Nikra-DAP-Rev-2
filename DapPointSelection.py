@@ -37,9 +37,9 @@ class _CommandDapPoint:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon8.png"),
-            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Point",
+            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Point_alias",
                                                  "Add Point"),
-            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Point",
+            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Point_alias",
                                                 "Creates and defines a point for the DAP analysis")}
 
     #  -------------------------------------------------------------------------

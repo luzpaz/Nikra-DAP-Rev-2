@@ -33,9 +33,9 @@ class _CommandDapMaterial:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon5.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Material",
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Material_alias",
                                                      "Define material properties"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Material",
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Material_alias",
                                                     "Define the material properties associated with each body.")}
 
     #  -------------------------------------------------------------------------

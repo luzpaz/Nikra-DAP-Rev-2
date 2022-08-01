@@ -29,9 +29,9 @@ class _CommandDapPlot:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon9.png"),
-            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Plot",
+            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Plot_alias",
                                                  "Plot results"),
-            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Plot",
+            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Plot_alias",
                                                 "Plot results")}
 
     #  -------------------------------------------------------------------------

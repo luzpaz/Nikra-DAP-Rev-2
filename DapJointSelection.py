@@ -45,9 +45,9 @@ class _CommandDapJoint:
         return {'Pixmap': os.path.join(DapTools.get_module_path(),
                                        "icons",
                                        "Icon4.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Joint",
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Joint_alias",
                                                      "Add New Relative Movement Between 2 Bodies"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Joint",
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Joint_alias",
                                                     "Add a new relative movement between two bodies")}
 
     #  -------------------------------------------------------------------------
