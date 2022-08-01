@@ -37,26 +37,35 @@
 
 # from unicodedata import name
 import FreeCAD
-from FreeCAD import Base
 import math
-from math import degrees, acos
 import os
 import DapTools
-from DapTools import addObjectProperty
 import _DapBodySelector
-from pivy import coin
+import pivy
 import Part
+
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
 Debug = True
 
-FORCE_TYPES = ["Gravity", "Spring", "Linear Spring Damper", "Rotational Spring", "Rotational Spring Damper"]
-FORCE_TYPE_HELPER_TEXT = ["Universal force of attraction between all matter",
-                          "Linear Spring connecting two points with stiffness and undeformed length", "A device used to limit or retard vibration ", "Device that stores energy when twisted and exerts a toraue in the opposite direction", "Device used to limit movement and vibration through continuous rotation"]
+FORCE_TYPES = [
+    "Gravity",
+    "Spring",
+    "Linear Spring Damper",
+    "Rotational Spring",
+    "Rotational Spring Damper",
+]
+FORCE_TYPE_HELPER_TEXT = [
+    "Universal force of attraction between all matter",
+    "Linear Spring connecting two points with stiffness and undeformed length",
+    "A device used to limit or retard vibration ",
+    "Device that stores energy when twisted and exerts a toraue in the opposite direction",
+    "Device used to limit movement and vibration through continuous rotation",
+]
 # container
 
 
@@ -75,27 +84,26 @@ class _CommandDapForce:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
-            'Pixmap': os.path.join(DapTools.get_module_path(),
-                                   "icons",
-                                   "Icon6.png"),
-            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Force_alias",
-                                                 "Add Force"),
-            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Force_alias",
-                                                "Creates and defines a force for the DAP analysis")}
+            "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon6.png"),
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP("Dap_Force_alias", "Add Force"),
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Force_alias", "Creates and defines a force for the DAP analysis"
+            ),
+        }
 
     #  -------------------------------------------------------------------------
     def IsActive(self):
-        """ Determine if the command/icon must be active or greyed out """
+        """Determine if the command/icon must be active or greyed out"""
 
         return DapTools.getActiveContainer() is not None
 
     #  -------------------------------------------------------------------------
     def Activated(self):
-        """ Called when the Force Selection command is run """
+        """Called when the Force Selection command is run"""
         if Debug:
             FreeCAD.Console.PrintMessage("Running: Force Selection\n")
 
@@ -107,6 +115,7 @@ class _CommandDapForce:
         # FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
         import DapTools
         import DapForceSelection
+
         DapTools.getActiveContainer().addObject(DapForceSelection.makeDapForce())
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
@@ -124,59 +133,205 @@ class _DapForce:
     #  -------------------------------------------------------------------------
     def initProperties(self, obj):
         """ """
-        addObjectProperty(obj, 'ForceTypes', FORCE_TYPES, "App::PropertyEnumeration", "", "Types of Forces")
-        addObjectProperty(obj, 'gx', "", "App::PropertyAcceleration", "", "X Component")
-        addObjectProperty(obj, 'gy', "-9.81 m/s^2", "App::PropertyAcceleration", "", "Y Component")
-        addObjectProperty(obj, 'gz', "", "App::PropertyAcceleration", "", "Z Component")
-        addObjectProperty(obj, 'Stiffness', "", "App::PropertyQuantity", "", "Linear Spring Stiffness")
-        addObjectProperty(obj, 'RotStiffness', "", "App::PropertyQuantity", "", "Rotational Spring Stiffness")
-        addObjectProperty(obj, 'LinDampCoeff', "", "App::PropertyQuantity", "", "Linear damping coefficient")
-        addObjectProperty(obj, 'RotDampCoeff', "", "App::PropertyQuantity", "", "Rotational damping coefficient")
-        addObjectProperty(obj, 'UndeformedLength', "", "App::PropertyLength", "", "Linear undeformed Length")
-        addObjectProperty(obj, 'UndeformedAngle', "", "App::PropertyAngle", "", "Undeformed angle")
-        addObjectProperty(obj, 'Body1', "Ground", "App::PropertyString", "", "Body 1 label")
-        addObjectProperty(obj, 'Body2', "Ground", "App::PropertyString", "", "Body 2 label")
-        addObjectProperty(obj, 'Joint1', "", "App::PropertyString", "", "Joint 1 label")
-        addObjectProperty(obj, 'Joint2', "", "App::PropertyString", "", "Joint 2 label")
-        addObjectProperty(obj, 'DampCondition', "", "App::PropertyString", "", "Displays the damping condition")
-        addObjectProperty(obj, 'JointCoord1', FreeCAD.Vector(0, 0, 0), "App::PropertyVector", "", "Vector to display joint visualisation")
-        addObjectProperty(obj, 'JointCoord2', FreeCAD.Vector(0, 0, 0), "App::PropertyVector", "", "Vector to display joint visualisation")
-        addObjectProperty(obj, 'tEndDriverFuncTypeA', "", "App::PropertyQuantity", "",
-                          "Driver Function Type A: End time (t_end)")
-        addObjectProperty(obj, 'coefC1DriverFuncTypeA', "", "App::PropertyQuantity", "",
-                          "Driver Function Type A: coefficient 'c_1'")
-        addObjectProperty(obj, 'coefC2DriverFuncTypeA', "", "App::PropertyQuantity", "",
-                          "Driver Function Type A: coefficient 'c_2'")
-        addObjectProperty(obj, 'coefC3DriverFuncTypeA', "", "App::PropertyQuantity", "",
-                          "Driver Function Type A: coefficient 'c_3'")
-        addObjectProperty(obj, 'tStartDriverFuncTypeB', "", "App::PropertyQuantity", "",
-                          "Driver Function Type B: Start time (t_start)")
-        addObjectProperty(obj, 'tEndDriverFuncTypeB', "", "App::PropertyQuantity", "",
-                          "Driver Function Type B: End time (t_end)")
-        addObjectProperty(obj, 'initialValueDriverFuncTypeB', "", "App::PropertyQuantity", "",
-                          "Driver Function Type B: initial function value")
-        addObjectProperty(obj, 'endValueDriverFuncTypeB', "", "App::PropertyQuantity", "",
-                          "Driver Function Type B: function value at t_end")
-        addObjectProperty(obj, 'tStartDriverFuncTypeC', "", "App::PropertyQuantity", "",
-                          "Driver Function Type C: Start time (t_start)")
-        addObjectProperty(obj, 'tEndDriverFuncTypeC', "", "App::PropertyQuantity", "",
-                          "Driver Function Type C: End time (t_end)")
-        addObjectProperty(obj, 'initialValueDriverFuncTypeC', "", "App::PropertyQuantity", "",
-                          "Driver Function Type C: initial function value")
-        addObjectProperty(obj, 'endDerivativeDriverFuncTypeC', "", "App::PropertyQuantity", "",
-                          "Driver Function Type C: function derivative at t_end")
-        addObjectProperty(obj, 'Checker', False, "App::PropertyBool", "", "")
-        addObjectProperty(obj, 'a_Checker', False, "App::PropertyBool", "", "")
-        addObjectProperty(obj, 'b_Checker', False, "App::PropertyBool", "", "")
-        addObjectProperty(obj, 'c_Checker', False, "App::PropertyBool", "", "")
+        DapTools.addObjectProperty(
+            obj,
+            "ForceTypes",
+            FORCE_TYPES,
+            "App::PropertyEnumeration",
+            "",
+            "Types of Forces",
+        )
+        DapTools.addObjectProperty(
+            obj, "gx", "", "App::PropertyAcceleration", "", "X Component"
+        )
+        DapTools.addObjectProperty(
+            obj, "gy", "-9.81 m/s^2", "App::PropertyAcceleration", "", "Y Component"
+        )
+        DapTools.addObjectProperty(
+            obj, "gz", "", "App::PropertyAcceleration", "", "Z Component"
+        )
+        DapTools.addObjectProperty(
+            obj, "Stiffness", "", "App::PropertyQuantity", "", "Linear Spring Stiffness"
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "RotStiffness",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Rotational Spring Stiffness",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "LinDampCoeff",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Linear damping coefficient",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "RotDampCoeff",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Rotational damping coefficient",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "UndeformedLength",
+            "",
+            "App::PropertyLength",
+            "",
+            "Linear undeformed Length",
+        )
+        DapTools.addObjectProperty(
+            obj, "UndeformedAngle", "", "App::PropertyAngle", "", "Undeformed angle"
+        )
+        DapTools.addObjectProperty(
+            obj, "Body1", "Ground", "App::PropertyString", "", "Body 1 label"
+        )
+        DapTools.addObjectProperty(
+            obj, "Body2", "Ground", "App::PropertyString", "", "Body 2 label"
+        )
+        DapTools.addObjectProperty(
+            obj, "Joint1", "", "App::PropertyString", "", "Joint 1 label"
+        )
+        DapTools.addObjectProperty(
+            obj, "Joint2", "", "App::PropertyString", "", "Joint 2 label"
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "DampCondition",
+            "",
+            "App::PropertyString",
+            "",
+            "Displays the damping condition",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "JointCoord1",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyVector",
+            "",
+            "Vector to display joint visualisation",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "JointCoord2",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyVector",
+            "",
+            "Vector to display joint visualisation",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "tEndDriverFuncTypeA",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type A: End time (t_end)",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "coefC1DriverFuncTypeA",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type A: coefficient 'c_1'",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "coefC2DriverFuncTypeA",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type A: coefficient 'c_2'",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "coefC3DriverFuncTypeA",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type A: coefficient 'c_3'",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "tStartDriverFuncTypeB",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type B: Start time (t_start)",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "tEndDriverFuncTypeB",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type B: End time (t_end)",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "initialValueDriverFuncTypeB",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type B: initial function value",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "endValueDriverFuncTypeB",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type B: function value at t_end",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "tStartDriverFuncTypeC",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type C: Start time (t_start)",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "tEndDriverFuncTypeC",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type C: End time (t_end)",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "initialValueDriverFuncTypeC",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type C: initial function value",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "endDerivativeDriverFuncTypeC",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Driver Function Type C: function derivative at t_end",
+        )
+        DapTools.addObjectProperty(obj, "Checker", False, "App::PropertyBool", "", "")
+        DapTools.addObjectProperty(obj, "a_Checker", False, "App::PropertyBool", "", "")
+        DapTools.addObjectProperty(obj, "b_Checker", False, "App::PropertyBool", "", "")
+        DapTools.addObjectProperty(obj, "c_Checker", False, "App::PropertyBool", "", "")
         obj.setEditorMode("Checker", 2)
         obj.setEditorMode("a_Checker", 2)
         obj.setEditorMode("b_Checker", 2)
         obj.setEditorMode("c_Checker", 2)
-        obj.Stiffness = FreeCAD.Units.Unit('kg/s^2')
-        obj.RotStiffness = FreeCAD.Units.Unit('N*m/rad')
-        obj.LinDampCoeff = FreeCAD.Units.Unit('kg/s')
-        obj.RotDampCoeff = FreeCAD.Units.Unit('(J*s)/rad')
+        obj.Stiffness = FreeCAD.Units.Unit("kg/s^2")
+        obj.RotStiffness = FreeCAD.Units.Unit("N*m/rad")
+        obj.LinDampCoeff = FreeCAD.Units.Unit("kg/s")
+        obj.RotDampCoeff = FreeCAD.Units.Unit("(J*s)/rad")
         obj.tEndDriverFuncTypeA = FreeCAD.Units.Unit("")
         obj.coefC1DriverFuncTypeA = FreeCAD.Units.Unit("")
         obj.coefC2DriverFuncTypeA = FreeCAD.Units.Unit("")
@@ -220,10 +375,10 @@ class _DapForce:
             desired_direction = obj.JointCoord2 - obj.JointCoord1
             if h > 0:
                 desired_direction = desired_direction.normalize()
-                angle = degrees(acos(desired_direction * creation_axis))
+                angle = degrees(math.acos(desired_direction * creation_axis))
                 axis = creation_axis.cross(desired_direction)
                 helix = Part.makeHelix(p, h, r)
-                #  circle = Part.makeCircle(r_1, Base.Vector(r, 0, 0), Base.Vector(0,1, 0))
+                #  circle = Part.makeCircle(r_1, FreeCAD.Base.Vector(r, 0, 0), FreeCAD.Base.Vector(0,1, 0))
                 #  circle = Part.Wire([circle])
                 #  pipe = Part.Wire(helix).makePipe(circle)
                 #  obj.Shape = pipe
@@ -239,7 +394,10 @@ class _DapForce:
                 obj.Placement.translate(obj.JointCoord1)
             else:
                 obj.Shape = Part.Shape()
-        elif obj.ForceTypes == "Rotational Spring" or obj.ForceTypes == "Rotational Spring Damper":
+        elif (
+            obj.ForceTypes == "Rotational Spring"
+            or obj.ForceTypes == "Rotational Spring Damper"
+        ):
             doc_name = str(obj.Document.Name)
             doc = FreeCAD.getDocument(doc_name)
             vol1 = 0
@@ -263,7 +421,7 @@ class _DapForce:
             spiral.Rotations = r_
             spiral.Placement.Base = FreeCAD.Vector(0, 0, 0)
             spiral = document.getObject("Spiral").Shape
-            #  circle = Part.makeCircle(t, Base.Vector(r, 0, 0), Base.Vector(0,1, 0))
+            #  circle = Part.makeCircle(t, FreeCAD.Base.Vector(r, 0, 0), FreeCAD.Base.Vector(0,1, 0))
             #  circle = Part.Wire([circle])
             #  pipe = Part.Wire(spiral)
             #  pipe = pipe.makePipe(circle)
@@ -452,7 +610,7 @@ class _ViewProviderDapForce:
         """ """
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.standard = coin.SoGroup()
+        self.standard = pivy.coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
         # self.ViewObject.Transparency = 95
         return
@@ -487,13 +645,14 @@ class _ViewProviderDapForce:
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCAD.Console.PrintError("Task dialog already active\n")
         return True
 
     #  -------------------------------------------------------------------------
     def setEdit(self, vobj, mode):
         """ """
         import _TaskPanelDapForce
+
         taskd = _TaskPanelDapForce.TaskPanelDapForce(self.Object)
         # for obj in FreeCAD.ActiveDocument.Objects:
         #    # if obj.isDerivedFrom("Fem::FemMeshObject"):

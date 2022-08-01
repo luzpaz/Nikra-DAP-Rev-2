@@ -42,6 +42,7 @@ import numpy as np
 import sys
 import math
 import DapPlot
+
 try:
     from FreeCAD.Plot import Plot
 except ImportError:
@@ -59,7 +60,7 @@ Debug = True
 
 # =============================================================================
 class TaskPanelDapPlot:
-    """ Taskpanel for adding DAP Bodies """
+    """Taskpanel for adding DAP Bodies"""
 
     #  -------------------------------------------------------------------------
     def __init__(self):
@@ -75,7 +76,9 @@ class TaskPanelDapPlot:
         self.form.plottableItems.currentIndexChanged.connect(self.plottableIndexChanged)
         self.form.addButton.clicked.connect(self.addButtonPushed)
         self.form.removeButton.clicked.connect(self.removeButtonPushed)
-        self.form.tableWidget.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.form.tableWidget.horizontalHeader().setResizeMode(
+            QtGui.QHeaderView.Stretch
+        )
         self.form.tableWidget.cellClicked.connect(self.tableCellClicked)
         self.form.plotButton.clicked.connect(self.plotSelection)
 
@@ -98,7 +101,7 @@ class TaskPanelDapPlot:
         """ """
         plottable_index = self.form.plottableItems.currentIndex()
         part_label = self.plottableList[plottable_index]
-        if not(part_label in self.extractListOfObjectLabels()):
+        if not (part_label in self.extractListOfObjectLabels()):
             table_row = self.form.tableWidget.rowCount()
             self.form.tableWidget.insertRow(table_row)
             item = QtGui.QTableWidgetItem(part_label)
@@ -152,7 +155,7 @@ class TaskPanelDapPlot:
 
     #  -------------------------------------------------------------------------
     def getStandardButtons(self):
-        """ Set up some button attributes for the dialog ui """
+        """Set up some button attributes for the dialog ui"""
 
         return 0x00200000
 
@@ -192,8 +195,12 @@ class TaskPanelDapPlot:
                         x.append(self.solver_object.Bodies_r[timeIndex][body_index][0])
                         y.append(self.solver_object.Bodies_r[timeIndex][body_index][1])
                     if type == "Velocity":
-                        x.append(self.solver_object.Bodies_r_d[timeIndex][body_index][0])
-                        y.append(self.solver_object.Bodies_r_d[timeIndex][body_index][1])
+                        x.append(
+                            self.solver_object.Bodies_r_d[timeIndex][body_index][0]
+                        )
+                        y.append(
+                            self.solver_object.Bodies_r_d[timeIndex][body_index][1]
+                        )
             if part in list(self.solver_object.object_to_point.keys()):
                 point_index = self.solver_object.object_to_point[part]
                 # FreeCAD.Console.PrintMessage("In extract plot disp vel, part: " + str(part) + "\n")
@@ -204,8 +211,12 @@ class TaskPanelDapPlot:
                         x.append(self.solver_object.Points_r[timeIndex][point_index][0])
                         y.append(self.solver_object.Points_r[timeIndex][point_index][1])
                     if type == "Velocity":
-                        x.append(self.solver_object.Points_r_d[timeIndex][point_index][0])
-                        y.append(self.solver_object.Points_r_d[timeIndex][point_index][1])
+                        x.append(
+                            self.solver_object.Points_r_d[timeIndex][point_index][0]
+                        )
+                        y.append(
+                            self.solver_object.Points_r_d[timeIndex][point_index][1]
+                        )
             x_list.append(x)
             y_list.append(y)
         return x_list, y_list
@@ -251,12 +262,14 @@ class TaskPanelDapPlot:
                 if what_to_plot == "Position" or what_to_plot == "Velocity":
                     fig = plot.figure("x " + what_to_plot)
                     ax = fig.axes
-                    x_list, y_list = self.extractPlotDispVel(parts_list, times, what_to_plot)
+                    x_list, y_list = self.extractPlotDispVel(
+                        parts_list, times, what_to_plot
+                    )
                     ax.set_title("x " + what_to_plot)
                     ax.set_ylabel("x [" + str(units) + "]")
                     for i in range(len(x_list)):
                         ax.plot(times, x_list[i], label=legend_list[i])
-                    ax.legend(loc='lower left')
+                    ax.legend(loc="lower left")
                     fig.update()
                     fig = Plot.figure("y " + what_to_plot)
                     ax = fig.axes
@@ -264,7 +277,7 @@ class TaskPanelDapPlot:
                     ax.set_ylabel("y [" + str(units) + "]")
                     for i in range(len(y_list)):
                         ax.plot(times, y_list[i], label=legend_list[i])
-                    ax.legend(loc='lower left')
+                    ax.legend(loc="lower left")
                     fig.update()
                     # NOTE: For subplots instead of individual windows
                     # fig = Plot.figure(what_to_plot)
@@ -286,29 +299,37 @@ class TaskPanelDapPlot:
                     # fig.update()
                 elif what_to_plot == "Path Trace":
                     fig = Plot.figure("Path Trace")
-                    x_list, y_list = self.extractPlotDispVel(parts_list, times, what_to_plot)
+                    x_list, y_list = self.extractPlotDispVel(
+                        parts_list, times, what_to_plot
+                    )
                     ax = fig.axes
                     for i in range(len(x_list)):
                         FreeCAD.Console.PrintMessage(x_list)
                         ax.scatter(x_list[i], y_list[i], label=legend_list[i])
-                    ax.legend(loc='lower left')
-                    ax.set_xlabel('x [m]')
-                    ax.set_ylabel('y [m]')
+                    ax.legend(loc="lower left")
+                    ax.set_xlabel("x [m]")
+                    ax.set_ylabel("y [m]")
                     fig.update()
             if self.form.realRadioButton.isChecked():
                 if what_to_plot == "Position" or what_to_plot == "Velocity":
                     fig = Plot.figure(what_to_plot)
                     ax = fig.axes
-                    x_list, y_list = self.extractPlotDispVel(parts_list, times, what_to_plot)
-                    x_list, y_list, z_list = self.convertOrthonormalToReal(x_list, y_list)
+                    x_list, y_list = self.extractPlotDispVel(
+                        parts_list, times, what_to_plot
+                    )
+                    x_list, y_list, z_list = self.convertOrthonormalToReal(
+                        x_list, y_list
+                    )
                     fig = Plot.figure("x " + what_to_plot)
                     ax = fig.axes
-                    x_list, y_list = self.extractPlotDispVel(parts_list, times, what_to_plot)
+                    x_list, y_list = self.extractPlotDispVel(
+                        parts_list, times, what_to_plot
+                    )
                     ax.set_title("x " + what_to_plot)
                     ax.set_ylabel("x [" + str(units) + "]")
                     for i in range(len(x_list)):
                         ax.plot(times, x_list[i], label=legend_list[i])
-                    ax.legend(loc='lower left')
+                    ax.legend(loc="lower left")
                     fig.update()
                     fig = Plot.figure("y " + what_to_plot)
                     ax = fig.axes
@@ -316,7 +337,7 @@ class TaskPanelDapPlot:
                     ax.set_ylabel("y [" + str(units) + "]")
                     for i in range(len(y_list)):
                         ax.plot(times, y_list[i], label=legend_list[i])
-                    ax.legend(loc='lower left')
+                    ax.legend(loc="lower left")
                     fig.update()
                     fig = Plot.figure("z " + what_to_plot)
                     ax = fig.axes
@@ -324,7 +345,7 @@ class TaskPanelDapPlot:
                     ax.set_ylabel("z [" + str(units) + "]")
                     for i in range(len(z_list)):
                         ax.plot(times, z_list[i], label=legend_list[i])
-                    ax.legend(loc='lower left')
+                    ax.legend(loc="lower left")
                     fig.update()
                     # NOTE: For subplots instead of individual windows
                     # ax.change_geometry(3,1,1)
@@ -347,22 +368,29 @@ class TaskPanelDapPlot:
                     # fig.update()
                 if what_to_plot == "Path Trace":
                     fig = Plot.figure("Path Trace")
-                    x_list, y_list = self.extractPlotDispVel(parts_list, times, what_to_plot)
-                    x_list, y_list, z_list = self.convertOrthonormalToReal(x_list, y_list)
+                    x_list, y_list = self.extractPlotDispVel(
+                        parts_list, times, what_to_plot
+                    )
+                    x_list, y_list, z_list = self.convertOrthonormalToReal(
+                        x_list, y_list
+                    )
                     from mpl_toolkits.mplot3d import Axes3D
+
                     # NOTE: to get around the deprecated warning, creating new axis
                     # instance, and hiding previous instance. Perhaps until plot
                     # module has been updated to custom create a new axis on init
                     ax1 = fig.axes
                     ax1.set_visible(False)
-                    ax = fig.fig.add_subplot(2, 1, 1, projection='3d')
+                    ax = fig.fig.add_subplot(2, 1, 1, projection="3d")
                     ax.change_geometry(1, 1, 1)
                     for i in range(len(x_list)):
-                        ax.scatter(x_list[i], y_list[i], z_list[i], label=legend_list[i])
-                    ax.set_xlabel('x [m]')
-                    ax.set_ylabel('y [m]')
-                    ax.set_zlabel('z [m]')
-                    ax.legend(loc='lower left')
+                        ax.scatter(
+                            x_list[i], y_list[i], z_list[i], label=legend_list[i]
+                        )
+                    ax.set_xlabel("x [m]")
+                    ax.set_ylabel("y [m]")
+                    ax.set_zlabel("z [m]")
+                    ax.legend(loc="lower left")
                     fig.update()
         else:
             times = self.solver_object.ReportedTimes

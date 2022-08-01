@@ -44,8 +44,8 @@ Debug = True
 def RotMatrix(p):
     """This function sets up a rotational transformation matrix"""
 
-    c = np.cos(p)
-    s = np.sin(p)
+    c = np.math.cos(p)
+    s = np.math.sin(p)
     A = np.array([[c, -s], [s, c]])
     return A
 

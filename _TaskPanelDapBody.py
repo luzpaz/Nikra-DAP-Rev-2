@@ -39,13 +39,12 @@
 import FreeCAD
 
 import os
-import os.path
 import DapTools
 import DapBodySelection
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtGui
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug

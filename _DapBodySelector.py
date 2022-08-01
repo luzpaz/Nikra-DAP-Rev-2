@@ -37,21 +37,16 @@
 
 import FreeCAD
 import os
-import os.path
 import DapTools
-from DapTools import addObjectProperty
 import DapForceSelection
 import _TaskPanelDapForce
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
-    from PySide import QtGui
-    from PySide.QtCore import QTimer
     import PySide
+
 import Part
 import math
-from math import degrees, acos
 
 # Select if we want to be in debug mode
 global Debug
@@ -78,7 +73,7 @@ class DapBodySelector:
         self.parent_widget = parent_widget
         self.form = FreeCADGui.PySideUic.loadUi(ui_path, self.parent_widget)
         self.parent_widget.layout().addWidget(self.form)
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "JointType", TYPES, "App::PropertyEnumeration", "", "Joint Types"
         )
 
@@ -275,7 +270,7 @@ class DapBodySelector:
 
     #            # creation_axis = FreeCAD.Vector(0, 0,1)
     #            # desired_direction = normalized(self.JointCoord2 - self.JointCoord1)
-    #            # angle = degrees(acos(dotproduct(creation_axis, desired_direction)))
+    #            # angle = degrees(math.acos(dotproduct(creation_axis, desired_direction)))
     #            # axis = crossproduct(creation_axis,desired_direction)
     #            # helix = Part.makeHelix(p,h,r)
     #            # helix.Placement.Base = self.JointCoord1

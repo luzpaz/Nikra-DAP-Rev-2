@@ -36,14 +36,14 @@
 
 import FreeCAD
 
-from os import path
+import os
 import DapTools
 import numpy as np
-from math import degrees
+import math
 
 if FreeCAD.GuiUp:
-    from FreeCADGui import Control, PySideUic
-    from PySide import QtGui, QtCore
+    import FreeCADGui
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -60,15 +60,11 @@ class TaskPanelDapAnimate:
         solver_object,
         solver_document,
         animation_document,
-        results,
         list_of_bodies,
-        rotation_matrix,
-        Bodies_r,  # The list of all the body locations for each clock tick
-        Bodies_p,
-    ):  # The list of all the body angles for each clock tick
+    ):
 
         if Debug:
-            FreeCAD.Console.PrintMessage("Running: TaskPanelDapAnimate  ->  __init__\n")
+            FreeCAD.Console.PrintMessage("Opening TaskPanelDapAnimate\n")
 
         # Here we get the list of objects from the FreeCAD active document
         self.animation_body_objects = FreeCAD.ActiveDocument.Objects
@@ -77,13 +73,16 @@ class TaskPanelDapAnimate:
         self.obj = solver_object
         self.solver_document = solver_document
         self.animation_document = animation_document
-        self.results = np.array(results)
+        self.results = np.array(solver_object.DapResults)
         self.list_of_bodies = list_of_bodies
-        self.rotation_matrix = rotation_matrix
-        self.Bodies_r = Bodies_r
-        self.Bodies_p = Bodies_p
+        self.rotation_matrix = solver_object.global_rotation_matrix
+        # The list of all the body locations for each clock tick
+        self.Bodies_r = solver_object.Bodies_r
+        # The list of all the body angles for each clock tick
+        self.Bodies_p = solver_object.Bodies_p
 
-        self.scale = 1e3  # convert from meters to mm
+        # Set the scale to convert from meters to mm
+        self.scale = 1.0e3
 
         # Transfer the values from the obj object (i.e. solver_object) to instance variables
         self.t_initial = self.obj.StartTime
@@ -92,13 +91,13 @@ class TaskPanelDapAnimate:
         self.plane_norm = self.obj.UnitVector
         self.reportedTimes = self.obj.ReportedTimes
 
-        # Set play back speed to mid-range
-        self.play_back_speed = 100  # msec
+        # Set play back period to mid-range
+        self.play_back_period = 100  # msec
 
         # Set up the timer parameters
         self.n_time_steps = len(self.Bodies_r) - 1
-        self.timer = QtCore.QTimer()
-        self.timer.setInterval(self.play_back_speed)
+        self.timer = PySide.QtCore.QTimer()
+        self.timer.setInterval(self.play_back_period)
         self.timer.timeout.connect(
             self.onTimerTimeout
         )  # callback function after each tick
@@ -108,16 +107,16 @@ class TaskPanelDapAnimate:
         )
 
         # Load the Dap Animate ui form
-        ui_path = path.join(path.dirname(__file__), "TaskPanelDapAnimate.ui")
-        self.form = PySideUic.loadUi(ui_path)
+        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelDapAnimate.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
-        # Set up values displayed on the form
+        # Set up the values displayed on the dialog
         self.form.horizontalSlider.setRange(0, self.n_time_steps)
         self.form.timeStepLabel.setText(
             "{0:5.3f}s / {1:5.3f}s".format(self.t_initial, self.t_final)
         )
 
-        # Define callback functions when changes are made to the form
+        # Define callback functions when changes are made in the dialog
         self.form.horizontalSlider.valueChanged.connect(self.moveObjects)
         self.form.startButton.clicked.connect(self.playStart)
         self.form.stopButton.clicked.connect(self.stopStop)
@@ -144,7 +143,7 @@ class TaskPanelDapAnimate:
         if Debug:
             FreeCAD.Console.PrintMessage("Animate 'close' button pressed\n")
 
-        Control.closeDialog()
+        FreeCADGui.Control.closeDialog()
         FreeCAD.closeDocument(self.animation_document.Name)
         FreeCAD.setActiveDocument(self.solver_document.Name)
 
@@ -183,9 +182,9 @@ class TaskPanelDapAnimate:
 
     #  -------------------------------------------------------------------------
     def changePlaySpeed(self, newSpeed):
-        """Alter the play back speed by a factor of 1/newSpeed"""
+        """Alter the play back period by a factor of 1/newSpeed"""
 
-        self.timer.setInterval(self.play_back_speed * (1.0 / newSpeed))
+        self.timer.setInterval(self.play_back_period * (1.0 / newSpeed))
 
     #  -------------------------------------------------------------------------
     def centerOfGravityOfCompound(self, compound):
@@ -234,7 +233,7 @@ class TaskPanelDapAnimate:
             current_pose = self.current_pose[body_number]
 
             # Calculate the position after ROTATION
-            angular_displacement = degrees(
+            angular_displacement = math.degrees(
                 current_pose[1] - previous_pose[body_number][1]
             )
             self.animation_body_objects[body_index].Placement.rotate(

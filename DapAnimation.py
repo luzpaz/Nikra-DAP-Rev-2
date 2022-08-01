@@ -40,7 +40,7 @@ import DapTools
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -49,25 +49,27 @@ Debug = True
 
 # =============================================================================
 class _CommandDapAnimation:
+    """Command to Perform an Animation of the solved system"""
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon8.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP(
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Animation_alias", "Animate solution"
             ),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Animation_alias", "Animates the motion of the moving bodies"
             ),
         }
 
     #  -------------------------------------------------------------------------
     def IsActive(self):
-        """Determine if the command/icon must be active or greyed out"""
+        """Determine if there are already some results stored in the solver object
+        i.e. Determine if the animate command/icon must be active or greyed out"""
 
         return DapTools.getSolverObject().DapResults is not None
 
@@ -75,16 +77,22 @@ class _CommandDapAnimation:
     def Activated(self):
         """Called when the Animation command is run"""
 
-        import DapTools
         import DapAnimation
         import _TaskPanelDapAnimate
 
-        # Get the identity of the objects and the solver document (which is the current active document)
+        # Get the identity of the solver object
         solver_object = DapTools.getSolverObject()
+
+        # Get the identity of the solver document
+        # (which is the active document on entry)
         solver_document = FreeCAD.ActiveDocument
+
+        # Get the list of body objects from the
+        # solver document while it is still the active document
         body_objects = DapTools.getListOfBodyObjects()
 
-        # Make "Animation" document active (or create it)
+        # Set an existing "Animation" document active
+        # or create it if it does not exist yet
         if "Animation" in FreeCAD.listDocuments():
             FreeCAD.setActiveDocument("Animation")
         else:
@@ -93,6 +101,7 @@ class _CommandDapAnimation:
 
         # Generate the list of bodies and
         # add their shapes to the animation_document
+        # and append their body labels to the list_of_bodies
         list_of_bodies = []
         for body in body_objects:
             animation_object = animation_document.addObject("Part::Feature", body.Label)
@@ -101,19 +110,15 @@ class _CommandDapAnimation:
             ).Shape = body.Shape.copy()
             list_of_bodies.append(body.Label)
 
-        # Request the animation window zoom to be set to fit the bodies
+        # Request the animation window zoom to be set to fit the entire system
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        # Display the Animation dialog
+        # Display (and run) the Animation dialog
         FreeCADGui.Control.showDialog(
             _TaskPanelDapAnimate.TaskPanelDapAnimate(
                 solver_object,
                 solver_document,
                 animation_document,
-                solver_object.DapResults,  # results
                 list_of_bodies,
-                solver_object.global_rotation_matrix,  # rotation_matrix
-                solver_object.Bodies_r,  # Bodies_r
-                solver_object.Bodies_p,
             )
-        )  # Bodies_p
+        )

@@ -39,13 +39,12 @@ from lib2to3.pytree import Base
 import FreeCAD
 import os
 import DapTools
-from DapTools import addObjectProperty
-from pivy import coin
+import pivy
 import Part
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -69,13 +68,13 @@ class _CommandDapPoint:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon8.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP("Dap_Point_alias", "Add Point"),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP("Dap_Point_alias", "Add Point"),
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Point_alias", "Creates and defines a point for the DAP analysis"
             ),
         }
@@ -120,8 +119,10 @@ class _DapPoint:
     #  -------------------------------------------------------------------------
     def initProperties(self, obj):
         """ """
-        addObjectProperty(obj, "Point", "", "App::PropertyString", "", "Point label")
-        addObjectProperty(
+        DapTools.addObjectProperty(
+            obj, "Point", "", "App::PropertyString", "", "Point label"
+        )
+        DapTools.addObjectProperty(
             obj,
             "PointCoord",
             FreeCAD.Vector(0, 0, 0),
@@ -129,7 +130,7 @@ class _DapPoint:
             "",
             "Point Vector",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "pointCoordList",
             [],
@@ -137,13 +138,13 @@ class _DapPoint:
             "",
             "List of Point Vectors",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "pointList", [], "App::PropertyStringList", "", "List of Points"
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "bodyNameList", [], "App::PropertyStringList", "", "List of Points"
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "pointAssignList", [], "App::PropertyStringList", "", "List of Points"
         )
         obj.setEditorMode("bodyNameList", 2)
@@ -208,7 +209,7 @@ class _ViewProviderDapForce:
         """ """
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.standard = coin.SoGroup()
+        self.standard = pivy.coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
         # self.ViewObject.Transparency = 95
         return

@@ -35,7 +35,6 @@
 # *                                                                                  *
 # ************************************************************************************
 
-from webbrowser import get
 import FreeCAD
 
 import os
@@ -48,8 +47,7 @@ import _DapForceDriver
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtGui
-    from PySide import QtCore
+    import PySide
 
 
 # =============================================================================

@@ -38,9 +38,7 @@
 import FreeCAD
 
 import os
-import os.path
 import DapTools
-from DapTools import addObjectProperty
 import DapForceSelection
 import _TaskPanelDapForce
 
@@ -52,9 +50,6 @@ Debug = True
 if FreeCAD.GuiUp:
     import FreeCADGui
     import PySide
-    from PySide import QtCore
-    from PySide import QtGui
-    from PySide.QtCore import QTimer
     import Part
 
 

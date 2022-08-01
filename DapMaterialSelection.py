@@ -37,13 +37,12 @@
 import FreeCAD
 import os
 import DapTools
-from DapTools import addObjectProperty
-from pivy import coin
+import pivy
 import Part
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -64,15 +63,15 @@ class _CommandDapMaterial:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon5.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP(
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Material_alias", "Define material properties"
             ),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Material_alias",
                 "Define the material properties associated with each body.",
             ),
@@ -118,7 +117,7 @@ class _DapMaterial:
     def initProperties(self, obj):
         """ """
         # PythonObject
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "MaterialDictionary",
             {},
@@ -168,7 +167,7 @@ class _ViewProviderDapJoint:
         """ """
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.standard = coin.SoGroup()
+        self.standard = pivy.coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
         # self.ViewObject.Transparency = 95
         return

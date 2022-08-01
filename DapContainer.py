@@ -36,12 +36,11 @@
 
 import FreeCAD
 import DapTools
-from DapTools import addObjectProperty
 import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -73,7 +72,7 @@ class _DapContainer:
     def initProperties(self, obj):
         """ """
         # obj.addProperty("App::PropertyPath", "OutputPath")
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "OutputPath",
             "",
@@ -81,7 +80,7 @@ class _DapContainer:
             "",
             "Path to which cases are written (blank to use system default)",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "IsActiveContainer",
             False,
@@ -108,15 +107,15 @@ class _CommandDapContainer:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon2.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP(
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Container_alias", "New Dap Container"
             ),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Container_alias", "Creates a Dap solver container"
             ),
         }

@@ -39,12 +39,12 @@ import FreeCAD
 
 import os
 import DapTools
-from pivy import coin
+import pivy
 import Part
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -71,13 +71,15 @@ class _CommandDapBody:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon3.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP("Dap_Body_alias", "Body Definition"),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Body_alias", "Body Definition"
+            ),
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Body_alias", "Creates and defines a body for the DAP analysis"
             ),
         }
@@ -236,7 +238,7 @@ class _ViewProviderDapBody:
         """ """
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.standard = coin.SoGroup()
+        self.standard = pivy.coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
         # self.ViewObject.Transparency = 95
         return

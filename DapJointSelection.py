@@ -37,15 +37,14 @@
 import FreeCAD
 import os
 import DapTools
-from DapTools import addObjectProperty
-from pivy import coin
+import pivy
 
 import Part
-from math import sin, cos, pi
+import math
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -85,15 +84,15 @@ class _CommandDapJoint:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon4.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP(
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Joint_alias", "Add New Relative Movement Between 2 Bodies"
             ),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Joint_alias", "Add a new relative movement between two bodies"
             ),
         }
@@ -141,7 +140,7 @@ class _DapJoint:
         all_subtypes = []
         for s in DEFINITION_MODES:
             all_subtypes += s
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "RelMovDefinitionMode",
             all_subtypes,
@@ -149,7 +148,7 @@ class _DapJoint:
             "",
             "Define the relative movement between 2 bodies",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "TypeOfRelMov",
             JOINT_TYPES,
@@ -157,7 +156,7 @@ class _DapJoint:
             "",
             "Type of Relative Movement",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "CoordPoint1RelMov",
             FreeCAD.Vector(0, 0, 0),
@@ -165,7 +164,7 @@ class _DapJoint:
             "",
             "Point 1 used to define relative movement between 2 bodies",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "CoordPoint2RelMov",
             FreeCAD.Vector(0, 0, 0),
@@ -173,13 +172,13 @@ class _DapJoint:
             "",
             "Point 2 used to define relative movement between 2 bodies",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "Body1", "Ground", "App::PropertyString", "", "Label: Body 1"
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "Body2", "Ground", "App::PropertyString", "", "Label: Body 2"
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "Point1RelMov",
             "",
@@ -187,7 +186,7 @@ class _DapJoint:
             "",
             "Label: Point 1 of Relative Movement",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "Point2RelMov",
             "",
@@ -195,7 +194,7 @@ class _DapJoint:
             "",
             "Label: Point 2 of Relative Movement",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "DriverOn",
             YES_NO,
@@ -203,7 +202,7 @@ class _DapJoint:
             "",
             "Is a 'driver' switched on to control the defined relative movement?",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "DriverFunctionType",
             FUNCTION_TYPES,
@@ -211,7 +210,7 @@ class _DapJoint:
             "",
             "Function type that the (switched on) 'driver' will use to control the defined relative movement.",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "tEndDriverFuncTypeA",
             "",
@@ -219,7 +218,7 @@ class _DapJoint:
             "",
             "Driver Function Type A: End time (t_end)",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "coefC1DriverFuncTypeA",
             "",
@@ -227,7 +226,7 @@ class _DapJoint:
             "",
             "Driver Function Type A: coefficient 'c_1'",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "coefC2DriverFuncTypeA",
             "",
@@ -235,7 +234,7 @@ class _DapJoint:
             "",
             "Driver Function Type A: coefficient 'c_2'",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "coefC3DriverFuncTypeA",
             "",
@@ -243,7 +242,7 @@ class _DapJoint:
             "",
             "Driver Function Type A: coefficient 'c_3'",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "tStartDriverFuncTypeB",
             "",
@@ -251,7 +250,7 @@ class _DapJoint:
             "",
             "Driver Function Type B: Start time (t_start)",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "tEndDriverFuncTypeB",
             "",
@@ -259,7 +258,7 @@ class _DapJoint:
             "",
             "Driver Function Type B: End time (t_end)",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "initialValueDriverFuncTypeB",
             "",
@@ -267,7 +266,7 @@ class _DapJoint:
             "",
             "Driver Function Type B: initial function value",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "endValueDriverFuncTypeB",
             "",
@@ -275,7 +274,7 @@ class _DapJoint:
             "",
             "Driver Function Type B: function value at t_end",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "tStartDriverFuncTypeC",
             "",
@@ -283,7 +282,7 @@ class _DapJoint:
             "",
             "Driver Function Type C: Start time (t_start)",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "tEndDriverFuncTypeC",
             "",
@@ -291,7 +290,7 @@ class _DapJoint:
             "",
             "Driver Function Type C: End time (t_end)",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "initialValueDriverFuncTypeC",
             "",
@@ -299,7 +298,7 @@ class _DapJoint:
             "",
             "Driver Function Type C: initial function value",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "endDerivativeDriverFuncTypeC",
             "",
@@ -385,13 +384,17 @@ class _DapJoint:
             cone1_dir = FreeCAD.Vector(0, 1, 0)
             cone1 = Part.makeCone(0, 2 * r2, 5 * r2, cone1_pos, cone1_dir)
             cone2_pos_x = (
-                obj.CoordPoint1RelMov.x - r1 * cos(pi / 3) + 5 * r2 * cos(pi / 6)
+                obj.CoordPoint1RelMov.x
+                - r1 * math.cos(math.pi / 3)
+                + 5 * r2 * math.cos(math.pi / 6)
             )
             cone2_pos_y = (
-                obj.CoordPoint1RelMov.y - r1 * sin(pi / 3) - 5 * r2 * sin(pi / 6)
+                obj.CoordPoint1RelMov.y
+                - r1 * math.sin(math.pi / 3)
+                - 5 * r2 * math.sin(math.pi / 6)
             )
             cone2_pos = FreeCAD.Vector(cone2_pos_x, cone2_pos_y, 0)
-            cone2_dir = FreeCAD.Vector(-cos(pi / 6), sin(pi / 6), 0)
+            cone2_dir = FreeCAD.Vector(-math.cos(math.pi / 6), math.sin(math.pi / 6), 0)
             cone2 = Part.makeCone(0, 2 * r2, 5 * r2, cone2_pos, cone2_dir)
             torus_w_arrows = Part.makeCompound([torus, cone1, cone2])
             obj.Shape = torus_w_arrows
@@ -462,7 +465,7 @@ class _ViewProviderDapJoint:
         """ """
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.standard = coin.SoGroup()
+        self.standard = pivy.coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
         # self.ViewObject.Transparency = 95
         return

@@ -46,7 +46,15 @@ import matplotlib.pyplot as plt
 import os
 import sys
 from DapHelperFunctions import RotMatrix, RotMatrix90
-from DapStructures import Body_struct, Force_struct, Joint_struct, Point_struct, Unit_struct, Funct_struct
+from DapStructures import (
+    Body_struct,
+    Force_struct,
+    Joint_struct,
+    Point_struct,
+    Unit_struct,
+    Funct_struct,
+)
+
 # %matplotlib qt5 (For Jupyter - Notebook -- > .ipynb)
 # # ------------------------------------------------- %%% Include global variables
 global Bodies, nB, nB3, nB6
@@ -87,31 +95,31 @@ def analysis(t, u):
     global showtime, t10
     global flags, pen_d0
     global M_array_, M_inv_array_
-    M_array_ = np.atleast_2d(M_array[1:3 * (nB - 1) + 1, 0]).T
-    M_inv_array_ = np.atleast_2d(M_inv_array[1:3 * (nB - 1) + 1, 0]).T
+    M_array_ = np.atleast_2d(M_array[1 : 3 * (nB - 1) + 1, 0]).T
+    M_inv_array_ = np.atleast_2d(M_inv_array[1 : 3 * (nB - 1) + 1, 0]).T
     u_to_Bodies(u)
     Update_Position()
     Update_Velocity()
     h_a = Force_array(t)
-    h_a_ = np.atleast_2d(h_a[1:3 * (nB - 1) + 1, 0]).T
+    h_a_ = np.atleast_2d(h_a[1 : 3 * (nB - 1) + 1, 0]).T
     if nConst == 0:
         c_dd = M_inv_array_ * h_a_
     else:
         D = Jacobian(t)
-        D_ = D[:, 0:3 * (nB - 1)]
+        D_ = D[:, 0 : 3 * (nB - 1)]
         rhsA = RHSAcc(t)
-        DMD1 = np.concatenate((np.diag(M_array_[:, 0]), - D_.T), axis=1)
+        DMD1 = np.concatenate((np.diag(M_array_[:, 0]), -D_.T), axis=1)
         DMD2 = np.concatenate((D_, np.zeros((nConst, nConst))), axis=1)
         DMD = np.concatenate((DMD1, DMD2), axis=0)
         rhs = np.concatenate((h_a_, rhsA), axis=0)
         sol = np.linalg.solve(DMD, rhs)
-        c_dd = sol[0:3 * (nB - 1)]
-        Lambda = sol[3 * (nB - 1):len(sol)]
+        c_dd = sol[0 : 3 * (nB - 1)]
+        Lambda = sol[3 * (nB - 1) : len(sol)]
     for Bi in range(1, nB):
         ir = Bodies[Bi, 0].irc
         i2 = ir + 1
         i3 = i2 + 1
-        Bodies[Bi, 0].r_dd = c_dd[ir - 1:i2]
+        Bodies[Bi, 0].r_dd = c_dd[ir - 1 : i2]
         Bodies[Bi, 0].p_dd = c_dd[i3 - 1]
     u_d = Bodies_to_u_d()
     global num
@@ -123,6 +131,8 @@ def analysis(t, u):
             print(t)
         t10 = t10 + 1
     return np.concatenate((u_d), axis=None)
+
+
 # ###############################################################
 #
 # Constraints
@@ -136,26 +146,28 @@ def Constraints():
     phi = np.zeros((nConst, 1))
     for Ji in range(1, nJ):
         print("Joints[Ji]", Joints[Ji, 0])
-        if Joints[Ji, 0].type == 'rev':
+        if Joints[Ji, 0].type == "rev":
             f = C_rev(Ji)
-        if Joints[Ji, 0].type == 'tran':
+        if Joints[Ji, 0].type == "tran":
             f = C_tran(Ji)
-        if Joints[Ji, 0].type == 'rev_rev':
+        if Joints[Ji, 0].type == "rev_rev":
             f = C_rev_rev(Ji)
-        if Joints[Ji, 0].type == 'rev_tran':
+        if Joints[Ji, 0].type == "rev_tran":
             f = C_rev_tran(Ji)
-        if Joints[Ji, 0].type == 'rigid':
+        if Joints[Ji, 0].type == "rigid":
             f = C_rigid(Ji)
-        if Joints[Ji, 0].type == 'disc':
+        if Joints[Ji, 0].type == "disc":
             f = C_disc(Ji)
-        if Joints[Ji, 0].type == 'rel_rot':
+        if Joints[Ji, 0].type == "rel_rot":
             f = C_rel_rot(Ji)
-        if Joints[Ji, 0].type == 'rel_tran':
+        if Joints[Ji, 0].type == "rel_tran":
             f = C_rel_tran(Ji)
         rs = Joints[Ji, 0].rows - 1
         re = Joints[Ji, 0].rowe
         phi[rs:re, 0] = f[:, 0]
     return phi
+
+
 # ###############################################################
 #
 # Forces
@@ -170,9 +182,9 @@ def Contact(Ci, Pi, Bi, k, e, Mi):
     global Bodies
     global flags_
     flags = np.zeros((10, 1))
-    pen = - Points[Pi, 0].rP[1, 0]
+    pen = -Points[Pi, 0].rP[1, 0]
     if pen > 0:
-        pen_d = - Points[Pi, 0].rP_d[1, 0]
+        pen_d = -Points[Pi, 0].rP_d[1, 0]
         if flags[Ci, 0] == 0:
             pen_d0[Ci, 0] = pen_d
             flags[Ci, 0] = 1
@@ -190,36 +202,44 @@ def Contact(Ci, Pi, Bi, k, e, Mi):
 
 # %%% Contact_FM
 # -------------------------------------------------------------------------
-def Contact_FM(delta, deld, deld0, K, e):                 # Contact force model Flores - Machado - Silva - Martins
-    fn = K * (delta**1.5) * (1 + 8 * (1 - e) * deld / (5 * e * deld0))
+def Contact_FM(
+    delta, deld, deld0, K, e
+):  # Contact force model Flores - Machado - Silva - Martins
+    fn = K * (delta ** 1.5) * (1 + 8 * (1 - e) * deld / (5 * e * deld0))
     return fn
 
 
 # %% Contatc_LN
 # -------------------------------------------------------------------------
-def Contact_LN(delta, deld, deld0, K, e):                 # Contact force model Lankarani - Nikravesh
-    fn = K * (delta**1.5) * (1 + 3 * (1 - np.e**2) * deld / (4 * deld0))
+def Contact_LN(delta, deld, deld0, K, e):  # Contact force model Lankarani - Nikravesh
+    fn = K * (delta ** 1.5) * (1 + 3 * (1 - np.e ** 2) * deld / (4 * deld0))
     return fn
 
 
 # %%% Friction_A
 # -------------------------------------------------------------------------
-def Friction_A(mu_s, mu_d, v_s, p, k_t, v, fN):           # Friction force based on Anderson et al. model [Viscous friction not included]
-    ff = fN * (mu_d + (mu_s - mu_d) * np.exp(-(abs(v) / v_s)**p)) * np.tanh(k_t * v)
+def Friction_A(
+    mu_s, mu_d, v_s, p, k_t, v, fN
+):  # Friction force based on Anderson et al. model [Viscous friction not included]
+    ff = fN * (mu_d + (mu_s - mu_d) * np.exp(-((abs(v) / v_s) ** p))) * np.tanh(k_t * v)
     return ff
 
 
 # %%% Friction_B
 # -------------------------------------------------------------------------
-def Friction_B(mu_s, mu_d, mu_v, v_t, fnt, v, fN):       # Friction force based on Brown - McPhee model [Viscous friction is included]
+def Friction_B(
+    mu_s, mu_d, mu_v, v_t, fnt, v, fN
+):  # Friction force based on Brown - McPhee model [Viscous friction is included]
     vr = v / v_t
-    ff = fN * (mu_d * np.tanh(4 * vr) + (mu_s - mu_d) * vr / (0.25 * vr**2 + 0.75)**2) + mu_v * v * np.tanh(4 * fN / fnt)
+    ff = fN * (
+        mu_d * np.tanh(4 * vr) + (mu_s - mu_d) * vr / (0.25 * vr ** 2 + 0.75) ** 2
+    ) + mu_v * v * np.tanh(4 * fN / fnt)
     return ff
 
 
 # % %% SDA_ptp
 # -------------------------------------------------------------------------
-def SDA_ptp(Fi):                                         # Point - to - point spring - damper - actuator
+def SDA_ptp(Fi):  # Point - to - point spring - damper - actuator
     global Bodies, delta_ptp
     Pi = Forces[Fi, 0].iPindex
     Pj = Forces[Fi, 0].jPindex
@@ -249,19 +269,31 @@ def SDA_rot(Fi):  # Rotational spring - damper - actuator
     Bi = Forces[Fi, 0].iBindex
     Bj = Forces[Fi, 0].jBindex
     if Bi == 0:
-        theta = - Bodies[Bj, 0].p
-        theta_d = - Bodies[Bj, 0].p_d
-        T = Forces[Fi, 0].k * (theta - Forces[Fi, 0].theta0) + Forces[Fi, 0].dc * theta_d + Forces[Fi, 0].T_a
+        theta = -Bodies[Bj, 0].p
+        theta_d = -Bodies[Bj, 0].p_d
+        T = (
+            Forces[Fi, 0].k * (theta - Forces[Fi, 0].theta0)
+            + Forces[Fi, 0].dc * theta_d
+            + Forces[Fi, 0].T_a
+        )
         Bodies[Bj, 0].n = Bodies[Bj, 0].n + T
     elif Bj == 0:
         theta = Bodies[Bi, 0].p
         theta_d = Bodies[Bi, 0].p_d
-        T = Forces[Fi, 0].k * (theta - Forces[Fi, 0].theta0) + Forces[Fi, 0].dc * theta_d + Forces[Fi, 0].T_a
+        T = (
+            Forces[Fi, 0].k * (theta - Forces[Fi, 0].theta0)
+            + Forces[Fi, 0].dc * theta_d
+            + Forces[Fi, 0].T_a
+        )
         Bodies[Bi, 0].n = Bodies[Bi, 0].n - T
     else:
         theta = Bodies[Bi, 0].p - Bodies[Bj, 0].p
         theta_d = Bodies[Bi, 0].p_d - Bodies[Bj, 0].p_d
-        T = Forces[Fi, 0].k * (theta - Forces[Fi, 0].theta0) + Forces[Fi, 0].dc * theta_d + Forces[Fi, 0].T_a
+        T = (
+            Forces[Fi, 0].k * (theta - Forces[Fi, 0].theta0)
+            + Forces[Fi, 0].dc * theta_d
+            + Forces[Fi, 0].T_a
+        )
         Bodies[Bi, 0].n = Bodies[Bi, 0].n - T
         Bodies[Bj, 0].n = Bodies[Bj, 0].n + T
 
@@ -277,10 +309,13 @@ def Force_array(t):
         #  class method/Dispatch method - "actual" switch
         #  define switch
         class switch(object):
-            def force_type(self, argument):                            # Dispatch method
+            def force_type(self, argument):  # Dispatch method
                 method_name = argument
-                method = getattr(self, method_name, lambda: "Invalid")  # Get the method from 'self'. Default to a lambda.
-                return method()                                        # Call the method as we return it
+                method = getattr(
+                    self, method_name, lambda: "Invalid"
+                )  # Get the method from 'self'. Default to a lambda.
+                return method()  # Call the method as we return it
+
             #  define "cases"
 
             def weight(self):
@@ -297,7 +332,9 @@ def Force_array(t):
             def flocal(self):
                 Bi = Forces[Fi, 0].iBindex
                 global Bodies
-                Bodies[Bi, 0].f = Bodies[Bi, 0].f + Bodies[Bi, 0].A @ Forces[Fi, 0].flocal
+                Bodies[Bi, 0].f = (
+                    Bodies[Bi, 0].f + Bodies[Bi, 0].A @ Forces[Fi, 0].flocal
+                )
 
             def f(self):
                 Bi = Forces[Fi, 0].iBindex
@@ -310,20 +347,21 @@ def Force_array(t):
                 Bodies[Bi, 0].f = Bodies[Bi, 0].n + Forces[Fi, 0].T
 
             def user(self):
-                if selection == 'a':
+                if selection == "a":
                     user_force_AA()
-                elif selection == 'b':
+                elif selection == "b":
                     user_force_Cart_C()
-                elif selection == 'c':
+                elif selection == "c":
                     user_force_Cart_D()
                 #  elif selection == 'd':
                 #      user_force_CB()
-                elif selection == 'd':
+                elif selection == "d":
                     user_force_MP_A()
                 #  elif selection == 'f':
                 #      user_force_Rod()
                 else:
-                    print('Undefined User Force')
+                    print("Undefined User Force")
+
         switch().force_type(Forces[Fi, 0].type)  # implement switch
     g = np.zeros((nB3, 1))
     for Bi in range(1, nB):
@@ -331,6 +369,8 @@ def Force_array(t):
         ke = ks + 3
         g[ks:ke, 0] = np.concatenate((Bodies[Bi, 0].f, Bodies[Bi, 0].n), axis=None)
     return g
+
+
 # ###############################################################
 #
 # Functions
@@ -347,7 +387,7 @@ def Force_array(t):
 #  -------------------------------------------------------------------------
 def funct_a(Ci, x):  # Function type 'a'
     c = Functs[Ci, 0].coeff
-    f = c[1, 0] + c[2, 0] * x + c[3, 0] * (x**2)
+    f = c[1, 0] + c[2, 0] * x + c[3, 0] * (x ** 2)
     f_d = c[2, 0] + c[4, 0] * x
     f_dd = c[4]
     return f, f_d, f_dd
@@ -363,9 +403,14 @@ def funct_b(Ci, xx):  # Function type 'b'
         f_dd = 0
     elif xx > Functs(Ci).t_start and xx < Functs(Ci).t_end:
         x = xx - Functs[Ci, 0].t_start
-        f = c[1, 0] * x**3 + c[2, 0] * x**4 + c[3, 0] * x**5 + Functs[Ci, 0].f_start
-        f_d = c[4, 0] * x**2 + c[5, 0] * x**3 + c[6, 0] * x**4
-        f_dd = c[7, 0] * x + c[8, 0] * x**2 + c[9, 0] * x**3
+        f = (
+            c[1, 0] * x ** 3
+            + c[2, 0] * x ** 4
+            + c[3, 0] * x ** 5
+            + Functs[Ci, 0].f_start
+        )
+        f_d = c[4, 0] * x ** 2 + c[5, 0] * x ** 3 + c[6, 0] * x ** 4
+        f_dd = c[7, 0] * x + c[8, 0] * x ** 2 + c[9, 0] * x ** 3
     else:
         f = Functs[Ci, 0].f_end
         f_d = 0
@@ -383,20 +428,27 @@ def funct_c(Ci, xx):  # Function type 'c'
         f_dd = 0
     elif xx > Functs[Ci, 0].t_start and xx < Functs[Ci, 0].t_end:
         x = xx - Functs[Ci, 0].t_start
-        f = c[1, 0] * x**4 + c[2, 0] * x**5 + c[3, 0] * x**6 + Functs[Ci, 0].f_start
-        f_d = c[4, 0] * x**3 + c[5, 0] * x**4 + c[6, 0] * x**5
-        f_dd = c[7, 0] * x**2 + c[8, 0] * x**3 + c[9, 0] * x**4
+        f = (
+            c[1, 0] * x ** 4
+            + c[2, 0] * x ** 5
+            + c[3, 0] * x ** 6
+            + Functs[Ci, 0].f_start
+        )
+        f_d = c[4, 0] * x ** 3 + c[5, 0] * x ** 4 + c[6, 0] * x ** 5
+        f_dd = c[7, 0] * x ** 2 + c[8, 0] * x ** 3 + c[9, 0] * x ** 4
     else:
         f = 0  # this should be undefined
         f_d = Functs[Ci, 0].dfdt_end
         f_dd = 0
     return f, f_d, f_dd
+
+
 # WARNING WARNING WARNING python does not support overloaded functions
 
 
 # %%% funct_ccc
 #  -------------------------------------------------------------------------
-def funct_c(Ci, xx):                # Function type 'c'
+def funct_c(Ci, xx):  # Function type 'c'
     c = Functs[Ci, 0].coeff
     if xx <= Functs[Ci, 0].t_start:
         f = Functs[Ci, 0].f_start
@@ -404,9 +456,28 @@ def funct_c(Ci, xx):                # Function type 'c'
         f_dd = 0
     elif xx > Functs[Ci, 0].x_start and xx < Functs[Ci, 0].x_end:
         x = xx - Functs[Ci, 0].x_start
-        f = c[1, 0] * x**3 + c[2, 0] * x**4 + c[3, 0] * x**5 + c[4, 0] * x**6 + c[5, 0] * x**7 + Functs[Ci, 0].f_start
-        f_d = c[6, 0] * x**2 + c[7, 0] * x**3 + c[8, 0] * x**4 + c[9, 0] * x**5 + c[10, 0] * x**6
-        f_dd = c[11, 0] * x + c[12, 0] * x**2 + c[13, 0] * x**3 + c[14, 0] * x**4 + c[15, 0] * x**5
+        f = (
+            c[1, 0] * x ** 3
+            + c[2, 0] * x ** 4
+            + c[3, 0] * x ** 5
+            + c[4, 0] * x ** 6
+            + c[5, 0] * x ** 7
+            + Functs[Ci, 0].f_start
+        )
+        f_d = (
+            c[6, 0] * x ** 2
+            + c[7, 0] * x ** 3
+            + c[8, 0] * x ** 4
+            + c[9, 0] * x ** 5
+            + c[10, 0] * x ** 6
+        )
+        f_dd = (
+            c[11, 0] * x
+            + c[12, 0] * x ** 2
+            + c[13, 0] * x ** 3
+            + c[14, 0] * x ** 4
+            + c[15, 0] * x ** 5
+        )
     else:
         f = Functs[Ci, 0].f_end
         f_d = 0
@@ -418,11 +489,13 @@ def funct_c(Ci, xx):                # Function type 'c'
 #  -------------------------------------------------------------------------
 def functs(Ci, t):
     class switch(object):
-
-        def Functs_type(self, argument):                            # Dispatch method
+        def Functs_type(self, argument):  # Dispatch method
             method_name = argument
-            method = getattr(self, method_name, lambda: "Invalid")  # Get the method from 'self'. Default to a lambda.
-            return method()                                         # Call the method as we return it
+            method = getattr(
+                self, method_name, lambda: "Invalid"
+            )  # Get the method from 'self'. Default to a lambda.
+            return method()  # Call the method as we return it
+
         #  define "cases"
 
         def a(self):
@@ -448,13 +521,14 @@ def functs(Ci, t):
 # %%% functData
 #  -------------------------------------------------------------------------
 def functionData(Ci):
-
     class switch(object):
-
-        def Functs_type(self, argument):                           # Dispatch method
+        def Functs_type(self, argument):  # Dispatch method
             method_name = argument
-            method = getattr(self, method_name, lambda: "Invalid")  # Get the method from 'self'. Default to a lambda.
-            return method()                                        # Call the method as we return it
+            method = getattr(
+                self, method_name, lambda: "Invalid"
+            )  # Get the method from 'self'. Default to a lambda.
+            return method()  # Call the method as we return it
+
         #  define "cases"
 
         def a(self):
@@ -467,41 +541,76 @@ def functionData(Ci):
             Functs[Ci, 0].ncoeff = 9
             xe = Functs[Ci, 0].t_end - Functs[Ci, 0].t_start
             fe = Functs[Ci, 0].f_end - Functs[Ci, 0].f_start
-            C = np.array([[xe**3, xe**4, xe**5],
-                          [3 * xe**2, 4 * xe**3, 5 * xe**4],
-                          [6 * xe, 12 * xe**2, 20 * xe**3]])
+            C = np.array(
+                [
+                    [xe ** 3, xe ** 4, xe ** 5],
+                    [3 * xe ** 2, 4 * xe ** 3, 5 * xe ** 4],
+                    [6 * xe, 12 * xe ** 2, 20 * xe ** 3],
+                ]
+            )
             sol = np.linalg.solve(C, np.array([[fe], [0], [0]]))
             Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, sol), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[3 * sol[1, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[4 * sol[2, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[5 * sol[3, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[6 * sol[1, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[12 * sol[2, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[20 * sol[3, 0]]])), axis=0)
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[3 * sol[1, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[4 * sol[2, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[5 * sol[3, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[6 * sol[1, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[12 * sol[2, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[20 * sol[3, 0]]])), axis=0
+            )
 
         def c(self):
             global Functs
             Functs[Ci, 0].ncoeff = 9
             xe = Functs[Ci, 0].t_end - Functs[Ci, 0].t_start
             fpe = Functs[Ci, 0].dfdt_end
-            C = np.array([[4 * xe**3, 5 * xe**4, 6 * xe**5],
-                          [12 * xe**2, 20 * xe**3, 30 * xe**4],
-                          [24 * xe, 60 * xe**2, 120 * xe**3]])
+            C = np.array(
+                [
+                    [4 * xe ** 3, 5 * xe ** 4, 6 * xe ** 5],
+                    [12 * xe ** 2, 20 * xe ** 3, 30 * xe ** 4],
+                    [24 * xe, 60 * xe ** 2, 120 * xe ** 3],
+                ]
+            )
             sol = np.linalg.solve(C, np.array([[fpe], [0], [0]]))
             Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, sol), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[4 * sol[1, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[5 * sol[2, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[6 * sol[3, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[12 * sol[1, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[20 * sol[2, 0]]])), axis=0)
-            Functs[Ci, 0].coeff = np.concatenate((Functs[Ci, 0].coeff, np.array([[30 * sol[3, 0]]])), axis=0)
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[4 * sol[1, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[5 * sol[2, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[6 * sol[3, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[12 * sol[1, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[20 * sol[2, 0]]])), axis=0
+            )
+            Functs[Ci, 0].coeff = np.concatenate(
+                (Functs[Ci, 0].coeff, np.array([[30 * sol[3, 0]]])), axis=0
+            )
+
     switch().Functs_type(Functs[Ci, 0].type)  # implement switch
+
 
 # import numpy as np
 #  -------------------------------------------------------------------------
 def initialize():
     import numpy as np
-# #### include global variables
+
+    # #### include global variables
     global Bodies, nB, nB3, nB6
     global Points, nP, Points_anim, nPanim, nPtot
     global Uvectors, nU
@@ -514,12 +623,12 @@ def initialize():
     global xmin, xmax, ymin, ymax
     global showtime, t10
     global flags, pen_d0
-    bodycolor = ['r', 'g', 'b', 'c', 'm']
+    bodycolor = ["r", "g", "b", "c", "m"]
     num = 0  # number of function evaluations
     t10 = 0
     flags = np.zeros((10, 1))
     pen_d0 = np.zeros((10, 1))
-# %%% Bodies
+    # %%% Bodies
     nB = len(Bodies)
     nB3 = 3 * (nB)
     nB6 = 6 * (nB)
@@ -530,15 +639,19 @@ def initialize():
         Bodies[Bi, 0].J_inv = 1 / Bodies[Bi, 0].J
         Bodies[Bi, 0].A = RotMatrix(Bodies[Bi, 0].p)
         Bodies[Bi, 0].color = bodycolor[Bi]
-# %%% Mass (inertia) matrix as an array
+    # %%% Mass (inertia) matrix as an array
     M_array = np.zeros((nB3, 1))
     M_inv_array = np.zeros((nB3, 1))
     for Bi in range(1, nB):
         is_ = 3 * (Bi - 1) + 1
         ie = is_ + 2 + 1
         M_array[is_:ie, 0] = [Bodies[Bi, 0].m, Bodies[Bi, 0].m, Bodies[Bi, 0].J]
-        M_inv_array[is_:ie, 0] = [Bodies[Bi, 0].m_inv, Bodies[Bi, 0].m_inv, Bodies[Bi, 0].J_inv]
-# %%% Points
+        M_inv_array[is_:ie, 0] = [
+            Bodies[Bi, 0].m_inv,
+            Bodies[Bi, 0].m_inv,
+            Bodies[Bi, 0].J_inv,
+        ]
+    # %%% Points
     nP = len(Points)
     # nPanim = len(Points_anim)
     # nPtot = nP + nPanim - 1
@@ -561,11 +674,15 @@ def initialize():
         print("nB", nB)
         for Bi in range(1, nB):
             if int(Points[Pi, 0].Bindex) == int(Bi):
-                length = len(Bodies[Bi, 0].pts)  # current length of pts Assigned but not used
-                Bodies[Bi, 0].pts = np.concatenate((Bodies[Bi, 0].pts, np.array([[Pi]])), axis=0)
+                length = len(
+                    Bodies[Bi, 0].pts
+                )  # current length of pts Assigned but not used
+                Bodies[Bi, 0].pts = np.concatenate(
+                    (Bodies[Bi, 0].pts, np.array([[Pi]])), axis=0
+                )
                 print(Bodies[Bi, 0].pts)
     print("==================================")
-# %%% Unit vectors
+    # %%% Unit vectors
     nU = len(Uvectors)
     for Vi in range(1, nU):
         if Uvectors.size == 0:
@@ -573,16 +690,18 @@ def initialize():
         elif Uvectors[Vi, 0].Bindex == 0:
             Uvectors[Vi, 0].u = Uvectors[Vi, 0].ulocal
             Uvectors[Vi, 0].u_r = RotMatrix90(Uvectors[Vi, 0].u)
-# %%% Force elements
+    # %%% Force elements
     nF = len(Forces)
     for Fi in range(1, nF):
         #  define switch
         class switch(object):
-
-            def force_type(self, argument):                            # Dispatch method
+            def force_type(self, argument):  # Dispatch method
                 method_name = argument
-                method = getattr(self, method_name, lambda: "Invalid")  # Get the method from 'self'. Default to a lambda.
-                return method()                                        # Call the method as we return it
+                method = getattr(
+                    self, method_name, lambda: "Invalid"
+                )  # Get the method from 'self'. Default to a lambda.
+                return method()  # Call the method as we return it
+
             #  define "cases"
 
             def weight(self):
@@ -595,19 +714,22 @@ def initialize():
                 Pj = Forces[Fi, 0].jPindex
                 Forces[Fi, 0].iBindex = Points[Pi, 0].Bindex
                 Forces[Fi, 0].jBindex = Points[Pj, 0].Bindex
+
         switch().force_type(Forces[Fi, 0].type)  # implement switch
-# %%% Joints
+    # %%% Joints
     nJ = len(Joints)
     cfriction = 0
     #  Assign number of constraints and number of bodies to each joint type
     for Ji in range(1, nJ):
         #  define switch
         class switch(object):
-
-            def joint_type(self, argument):                                                # Dispatch method
+            def joint_type(self, argument):  # Dispatch method
                 method_name = argument
-                method = getattr(self, method_name, lambda: print("Undefined joint type"))  # Get the method from 'self'. Default to a lambda.
-                return method()                                                            # Call the method as we return it
+                method = getattr(
+                    self, method_name, lambda: print("Undefined joint type")
+                )  # Get the method from 'self'. Default to a lambda.
+                return method()  # Call the method as we return it
+
             #  define "cases"
 
             def rev(self):
@@ -622,7 +744,7 @@ def initialize():
                 if Joints[Ji, 0].fix == 1:
                     Joints[Ji, 0].mrows = 3
                     if Bi == 0:
-                        Joints[Ji, 0].p0 = - Bodies[Bj, 0].p
+                        Joints[Ji, 0].p0 = -Bodies[Bj, 0].p
                     elif Bj == 0:
                         Joints[Ji, 0].p0 = Bodies[Bi, 0].p
                     else:
@@ -640,14 +762,24 @@ def initialize():
                 if Joints[Ji, 0].fix == 1:
                     Joints[Ji, 0].mrows = 3
                     if Bi == 0:
-                        Joints[Ji, 0].p0 = np.linalg.norm(Points[Pi, 0].rP - Bodies[Bj, 0].r
-                                                          - Bodies[Bj, 0].A @ Points[Pj, 0].sPlocal)
+                        Joints[Ji, 0].p0 = np.linalg.norm(
+                            Points[Pi, 0].rP
+                            - Bodies[Bj, 0].r
+                            - Bodies[Bj, 0].A @ Points[Pj, 0].sPlocal
+                        )
                     elif Bj == 0:
-                        Joints[Ji, 0].p0 = np.linalg.norm(Bodies[Bi, 0].r + Bodies[Bi, 0].A @ Points[Pi, 0].sPlocal
-                                                          - Points[Pj, 0].rP)
+                        Joints[Ji, 0].p0 = np.linalg.norm(
+                            Bodies[Bi, 0].r
+                            + Bodies[Bi, 0].A @ Points[Pi, 0].sPlocal
+                            - Points[Pj, 0].rP
+                        )
                     else:
-                        Joints[Ji, 0].p0 = np.linalg.norm(Bodies[Bi, 0].r + Bodies[Bi, 0].A @ Points[Pi, 0].sPlocal
-                                                          - Bodies[Bj, 0].r - Bodies[Bj, 0].A @ Points[Pj, 0].sPlocal)
+                        Joints[Ji, 0].p0 = np.linalg.norm(
+                            Bodies[Bi, 0].r
+                            + Bodies[Bi, 0].A @ Points[Pi, 0].sPlocal
+                            - Bodies[Bj, 0].r
+                            - Bodies[Bj, 0].A @ Points[Pj, 0].sPlocal
+                        )
 
             def rev_rev(self):
                 Joints[Ji, 0].mrows = 1
@@ -683,24 +815,27 @@ def initialize():
                 Bi = Joints[Ji, 0].iBindex
                 Bj = Joints[Ji, 0].jBindex
                 if Bi == 0:
-                    Joints[Ji, 0].d0 = - Bodies[Bj, 0].A.T @ Bodies[Bj, 0].r
-                    Joints[Ji, 0].p0 = - Bodies[Bj, 0].p
+                    Joints[Ji, 0].d0 = -Bodies[Bj, 0].A.T @ Bodies[Bj, 0].r
+                    Joints[Ji, 0].p0 = -Bodies[Bj, 0].p
                 elif Bj == 0:
                     Joints[Ji, 0].d0 = Bodies[Bi, 0].r
                     Joints[Ji, 0].p0 = Bodies[Bi, 0].p
                 else:
-                    Joints[Ji, 0].d0 = Bodies[Bj, 0].A.T @ (Bodies[Bi, 0].r - Bodies[Bj, 0].r)
+                    Joints[Ji, 0].d0 = Bodies[Bj, 0].A.T @ (
+                        Bodies[Bi, 0].r - Bodies[Bj, 0].r
+                    )
                     Joints[Ji, 0].p0 = Bodies[Bi, 0].p - Bodies[Bj, 0].p
+
         switch().joint_type(Joints[Ji, 0].type)  # implement switch
-# %%% Functions
+    # %%% Functions
     nFc = len(Functs)
     if Functs.size == 0:
         pass
     else:
         for Ci in range(1, nFc):
             functionData(Ci)
-# %%% Constraints & row/col. pointers
-# Compute number of constraints and determine row/column pointer
+    # %%% Constraints & row/col. pointers
+    # Compute number of constraints and determine row/column pointer
     nConst = 0
     for Ji in range(1, nJ):
         Joints[Ji, 0].rows = nConst + 1
@@ -714,6 +849,8 @@ def initialize():
         if Bj != 0:
             Joints[Ji, 0].coljs = 3 * (Bj - 1) + 1
             Joints[Ji, 0].colje = 3 * Bj
+
+
 ################################################################
 #
 # Jacobian
@@ -726,21 +863,21 @@ def Jacobian(t):
     global nJ, nConst, nB3, D  # rs, re, cis, cie, cjs, cje
     D = np.zeros((nConst, nB3))
     for Ji in range(1, nJ):
-        if Joints[Ji, 0].type == 'rev':
+        if Joints[Ji, 0].type == "rev":
             Di, Dj = J_rev(Ji)
-        elif Joints[Ji, 0].type == 'tran':
+        elif Joints[Ji, 0].type == "tran":
             Di, Dj = J_tran(Ji)
-        elif Joints[Ji, 0].type == 'disc':
+        elif Joints[Ji, 0].type == "disc":
             Di = J_disc(Ji)
-        elif Joints[Ji, 0].type == 'rev_rev':
+        elif Joints[Ji, 0].type == "rev_rev":
             Di, Dj = J_rev_rev(Ji)
-        elif Joints[Ji, 0].type == 'rev_tran':
+        elif Joints[Ji, 0].type == "rev_tran":
             Di, Dj = J_rev_tran(Ji)
-        elif Joints[Ji, 0].type == 'rel_rot':
+        elif Joints[Ji, 0].type == "rel_rot":
             Di, Dj = J_rel_rot(Ji)
-        elif Joints[Ji, 0].type == 'rel_tran':
+        elif Joints[Ji, 0].type == "rel_tran":
             Di, Dj = J_rel_tran(Ji)
-        elif Joints[Ji, 0].type == 'rigid':
+        elif Joints[Ji, 0].type == "rigid":
             Di, Dj = J_rigid(Ji)
         rs = Joints[Ji, 0].rows - 1
         re = Joints[Ji, 0].rowe
@@ -753,6 +890,8 @@ def Jacobian(t):
             cje = Joints[Ji, 0].colje
             D[rs:re, cjs:cje] = Dj
     return D
+
+
 ################################################################
 #
 # JOINTS
@@ -762,24 +901,32 @@ def Jacobian(t):
 
 #  -------------------------------------------------------------------------
 def A_disc(Ji):
-    f = np.array([[0],
-                  [0]])
+    f = np.array([[0], [0]])
     return f
 
 
 #  -------------------------------------------------------------------------
 def C_disc(Ji):
     Bi = Joints[Ji, 0].iBindex
-    f = np.array([[Bodies[Bi, 0].r[2, 0] - Joints[Ji, 0].R],
-                  [Bodies[Bi, 0].r[1, 0] - Joints[Ji, 0].x0 + Joints[Ji, 0].R * (Bodies[Bi, 0].p - Joints[Ji, 0].p0)]])
+    f = np.array(
+        [
+            [Bodies[Bi, 0].r[2, 0] - Joints[Ji, 0].R],
+            [
+                Bodies[Bi, 0].r[1, 0]
+                - Joints[Ji, 0].x0
+                + Joints[Ji, 0].R * (Bodies[Bi, 0].p - Joints[Ji, 0].p0)
+            ],
+        ]
+    )
     return f
 
 
 #  -------------------------------------------------------------------------
 def J_disc(Ji):
-    Di = np.array([[0, 1, 0],
-                   [1, 0, Joints[Ji, 0].R]])
+    Di = np.array([[0, 1, 0], [1, 0, Joints[Ji, 0].R]])
     return Di
+
+
 # %%%% rel - rot
 
 
@@ -795,9 +942,9 @@ def C_rel_rot(Ji):
     fun, fun_d, fun_dd = functs(Joints[Ji, 0].iFunct, t)
     Bi = Joints[Ji, 0].iBindex
     Bj = Joints[Ji, 0].jBindex
-    if (Bi == 0):
-        f = - Bodies[Bj, 0].p - fun
-    elif (Bj == 0):
+    if Bi == 0:
+        f = -Bodies[Bj, 0].p - fun
+    elif Bj == 0:
         f = Bodies[Bi, 0].p - fun
     else:
         f = Bodies[Bi, 0].p - Bodies[Bj, 0].p - fun
@@ -808,7 +955,7 @@ def C_rel_rot(Ji):
 def J_rel_rot(Ji):
     global Di, Dj
     Di = np.array([[0, 0, 1]])
-    Dj = np.array([[0, 0, - 1]])
+    Dj = np.array([[0, 0, -1]])
     return Di, Dj
 
 
@@ -817,6 +964,8 @@ def V_rel_rot(Ji):
     fun, fun_d, fun_dd = functs(Joints[Ji, 0].iFunct, t)
     f = fun_d
     return f
+
+
 # %%%% rel - tran
 
 
@@ -829,13 +978,22 @@ def A_rel_tran(Ji):
     d = Points[Pi, 0].rP - Points[Pj, 0].rP
     d_d = Points[Pi, 0].rP_d - Points[Pj, 0].rP_d
     fun, fun_d, fun_dd = functs(Joints[Ji, 0].iFunct, t)
-    f = fun * fun_dd + fun_d**2
-    if (Bi == 0):
+    f = fun * fun_dd + fun_d ** 2
+    if Bi == 0:
         f = f + d.T * RotMatrix90(Points[Pj, 0].sP_d).T * Bodies[Bj, 0].p_d
-    elif (Bj == 0):
-        f = f - d.T * RotMatrix90(Points[Pi, 0].sP_d).T * Bodies[Bi, 0].p_d - d_d.T * d_d
+    elif Bj == 0:
+        f = (
+            f
+            - d.T * RotMatrix90(Points[Pi, 0].sP_d).T * Bodies[Bi, 0].p_d
+            - d_d.T * d_d
+        )
     else:
-        f = f + d.T * RotMatrix90(Points[Pj, 0].sP_d).T * Bodies[Bj, 0].p_d - d.T * RotMatrix90(Points[Pi, 0].sP_d).T * Bodies(Bi).p_d - d_d.T * d_d
+        f = (
+            f
+            + d.T * RotMatrix90(Points[Pj, 0].sP_d).T * Bodies[Bj, 0].p_d
+            - d.T * RotMatrix90(Points[Pi, 0].sP_d).T * Bodies(Bi).p_d
+            - d_d.T * d_d
+        )
     return f
 
 
@@ -845,7 +1003,7 @@ def C_rel_tran(Ji):
     Pj = Joints[Ji, 0].jPindex
     d = Points[Pi, 0].rP - Points[Pj, 0].rP
     fun, fun_d, fun_dd = functs(Joints[Ji, 0].iFunct, t)
-    f = (d.T * d - fun**2) / 2
+    f = (d.T * d - fun ** 2) / 2
     return f
 
 
@@ -876,9 +1034,12 @@ def A_rev(Ji):
     if Bi == 0:
         f = RotMatrix90(Points[Pj, 0].sP_d) * Bodies[Bj, 0].p_d
     elif Bj == 0:
-        f = - RotMatrix90(Points[Pi, 0].sP_d) * Bodies[Bi, 0].p_d
+        f = -RotMatrix90(Points[Pi, 0].sP_d) * Bodies[Bi, 0].p_d
     else:
-        f = - RotMatrix90(Points[Pi, 0].sP_d) * Bodies[Bi, 0].p_d + RotMatrix90(Points[Pj, 0].sP_d) * Bodies[Bj, 0].p_d
+        f = (
+            -RotMatrix90(Points[Pi, 0].sP_d) * Bodies[Bi, 0].p_d
+            + RotMatrix90(Points[Pj, 0].sP_d) * Bodies[Bj, 0].p_d
+        )
     if Joints[Ji, 0].fix == 1:
         f = np.array([[f], [0]])
     return f
@@ -909,8 +1070,10 @@ def J_rev(Ji):
     Dj = np.concatenate((-np.eye(2), -Points[Pj, 0].sP_r), axis=1)
     if Joints[Ji, 0].fix == 1:
         Di = np.array([[Di], [0, 0, 1]])
-        Dj = np.array([[Dj], [0, 0, - 1]])
+        Dj = np.array([[Dj], [0, 0, -1]])
     return Di, Dj
+
+
 # %%%% rev - rev
 
 
@@ -925,13 +1088,18 @@ def A_rev_rev(Ji):
     L = Joints[Ji, 0].L
     u = d / L
     u_d = d_d / L
-    f = - u_d.T @ d_d
-    if (Bi == 0):
+    f = -u_d.T @ d_d
+    if Bi == 0:
         f = f + u.T @ RotMatrix90(Points[Pj, 0].sP_d) * Bodies[Bj, 0].p_d
-    elif (Bj == 0):
+    elif Bj == 0:
         f = f - u.T @ RotMatrix90(Points[Pi, 0].sP_d) * Bodies[Bi, 0].p_d
     else:
-        f = f - u.T @ (RotMatrix90(Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d - Points[Pj, 0].sP_d * Bodies[Bj, 0].p_d))
+        f = f - u.T @ (
+            RotMatrix90(
+                Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d
+                - Points[Pj, 0].sP_d * Bodies[Bj, 0].p_d
+            )
+        )
     return f
 
 
@@ -954,7 +1122,7 @@ def J_rev_rev(Ji):
     L = Joints[Ji, 0].L
     u = d / L
     Di = np.array([[u.T, u.T * Points[Pi, 0].sP_r]])
-    Dj = np.array([[- u.T, - u.T * Points[Pj, 0].sP_r]])
+    Dj = np.array([[-u.T, -u.T * Points[Pj, 0].sP_r]])
     return Di, Dj
 
 
@@ -972,9 +1140,15 @@ def A_rev_tran(Ji):
     if Bi == 0:
         f = ui.T * Points[Pj, 0].sP_d * Bodies[Bj, 0].p_d
     elif Bj == 0:
-        f = ui_d.T @ (d * Bodies[Bi, 0].p_d + 2 * RotMatrix90(d_d)) - ui.T @ Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d
+        f = (
+            ui_d.T @ (d * Bodies[Bi, 0].p_d + 2 * RotMatrix90(d_d))
+            - ui.T @ Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d
+        )
     else:
-        f = ui_d.T @ (d * Bodies[Bi, 0].p_d + 2 * RotMatrix90(d_d)) - ui.T @ (Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d - Points[Pj, 0].sP_d * Bodies[Bj, 0].p_d)
+        f = ui_d.T @ (d * Bodies[Bi, 0].p_d + 2 * RotMatrix90(d_d)) - ui.T @ (
+            Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d
+            - Points[Pj, 0].sP_d * Bodies[Bj, 0].p_d
+        )
     return f
 
 
@@ -996,8 +1170,10 @@ def J_rev_tran(Ji):
     ui_r = Uvectors(Joints[Ji, 0].iUindex).u_r
     d = Points[Pi, 0].rP - Points[Pj, 0].rP
     Di = np.array([[ui_r.T, ui.T * (Points[Pi, 0].sP - d)]])
-    Dj = np.array([[- ui_r.T, - ui.T * Points[Pj, 0].sP]])
+    Dj = np.array([[-ui_r.T, -ui.T * Points[Pj, 0].sP]])
     return Di, Dj
+
+
 # %%%% rigid
 
 
@@ -1006,7 +1182,9 @@ def A_rigid(Ji):
     Bj = Joints[Ji, 0].jBindex
     f = np.array([[0, 0, 0]]).T
     if Bj != 0:
-        f = np.array([[- Bodies[Bj, 0].A @ Joints[Ji, 0].d0 * Bodies[Bj, 0].p_d**2, 0]]).T
+        f = np.array(
+            [[-Bodies[Bj, 0].A @ Joints[Ji, 0].d0 * Bodies[Bj, 0].p_d ** 2, 0]]
+        ).T
     return f
 
 
@@ -1015,14 +1193,28 @@ def C_rigid(Ji):
     Bi = Joints[Ji, 0].iBindex
     Bj = Joints[Ji, 0].jBindex
     if Bi == 0:
-        f = np.array([[- 1 * (Bodies[Bj, 0].r + Bodies[Bj, 0].A @ Joints[Ji, 0].d0),
-                       - Bodies[Bj, 0].p - Joints[Ji, 0].p0]]).T
+        f = np.array(
+            [
+                [
+                    -1 * (Bodies[Bj, 0].r + Bodies[Bj, 0].A @ Joints[Ji, 0].d0),
+                    -Bodies[Bj, 0].p - Joints[Ji, 0].p0,
+                ]
+            ]
+        ).T
     elif Bj == 0:
-        f = np.array([[Bodies[Bi, 0].r - Joints[Ji, 0].d0,
-                     Bodies[Bi, 0].p - Joints[Ji, 0].p0]]).T
+        f = np.array(
+            [[Bodies[Bi, 0].r - Joints[Ji, 0].d0, Bodies[Bi, 0].p - Joints[Ji, 0].p0]]
+        ).T
     else:
-        f = np.array([[Bodies[Bi, 0].r - (Bodies[Bj, 0].r + Bodies[Bj, 0].A @ Joints[Ji, 0].d0),
-                       Bodies[Bi, 0].p - Bodies[Bj, 0].p - Joints[Ji, 0].p0]]).T
+        f = np.array(
+            [
+                [
+                    Bodies[Bi, 0].r
+                    - (Bodies[Bj, 0].r + Bodies[Bj, 0].A @ Joints[Ji, 0].d0),
+                    Bodies[Bi, 0].p - Bodies[Bj, 0].p - Joints[Ji, 0].p0,
+                ]
+            ]
+        ).T
     return f
 
 
@@ -1031,8 +1223,9 @@ def J_rigid(Ji):
     Bj = Joints[Ji, 0].jBindex
     Di = np.eye[3]
     if Bj != 0:
-        Dj = np.array([[- np.eye[2], - RotMatrix90(Bodies[Bj, 0].A @ Joints[Ji, 0].d0)],
-                       [0, 0, - 1]])
+        Dj = np.array(
+            [[-np.eye[2], -RotMatrix90(Bodies[Bj, 0].A @ Joints[Ji, 0].d0)], [0, 0, -1]]
+        )
     return Di, Dj
 
 
@@ -1050,7 +1243,9 @@ def A_tran(Ji):
     elif Bj == 0:
         f2 = 0
     else:
-        f2 = ujd.T @ (Bodies[Bi, 0].r - Bodies[Bj, 0].r) * Bodies[Bi, 0].p_d - 2 * ujd_r.T @ (Bodies[Bi, 0].r_d - Bodies[Bj, 0].r_d)
+        f2 = ujd.T @ (Bodies[Bi, 0].r - Bodies[Bj, 0].r) * Bodies[
+            Bi, 0
+        ].p_d - 2 * ujd_r.T @ (Bodies[Bi, 0].r_d - Bodies[Bj, 0].r_d)
     f = np.atleast_2d(np.concatenate((f2, np.array([[0]])), axis=None)).T
     if Joints[Ji, 0].fix == 1:
         d = Points[Pi, 0].rP - Points[Pj, 0].rP
@@ -1058,14 +1253,22 @@ def A_tran(Ji):
         L = Joints[Ji, 0].p0
         u = d / L
         u_d = d_d / L
-        f3 = (- u_d.T @ d_d)
+        f3 = -u_d.T @ d_d
         if Bi == 0:
-            f3 = (- u_d.T @ d_d) + u.T @ RotMatrix90(Points[Pj, 0].sP_d) @ Bodies[Bj, 0].p_d
+            f3 = (-u_d.T @ d_d) + u.T @ RotMatrix90(Points[Pj, 0].sP_d) @ Bodies[
+                Bj, 0
+            ].p_d
         elif Bj == 0:
-            f3 = (- u_d.T @ d_d) - u.T @ RotMatrix90(Points[Pi, 0].sP_d) @ Bodies[Bi, 0].p_d
+            f3 = (-u_d.T @ d_d) - u.T @ RotMatrix90(Points[Pi, 0].sP_d) @ Bodies[
+                Bi, 0
+            ].p_d
         else:
-            f3 = (- u_d.T @ d_d) - u.T @ (RotMatrix90(Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d
-                                                - Points[Pj, 0].sP_d * Bodies[Bj, 0].p_d))
+            f3 = (-u_d.T @ d_d) - u.T @ (
+                RotMatrix90(
+                    Points[Pi, 0].sP_d * Bodies[Bi, 0].p_d
+                    - Points[Pj, 0].sP_d * Bodies[Bj, 0].p_d
+                )
+            )
         f = np.array([[f], [f3]])
     return f
 
@@ -1081,8 +1284,7 @@ def C_tran(Ji):
     d = Points[Pi, 0].rP - Points[Pj, 0].rP
     f = np.array([[uj_r.T @ d], [uj_r.T @ ui]]).T
     if Joints[Ji, 0].fix == 1:
-        f = np.array([[f],
-                      [(ui.T @ d - Joints[Ji, 0].p0) / 2]])
+        f = np.array([[f], [(ui.T @ d - Joints[Ji, 0].p0) / 2]])
     return f
 
 
@@ -1096,10 +1298,12 @@ def J_tran(Ji):
     Di1 = np.concatenate((uj_r.T, uj.T @ Points[Pi, 0].sP), axis=1)
     Di2 = np.array([[0, 0, 1]])
     Di = np.concatenate((Di1, Di2), axis=0)
-    Dj1 = np.concatenate((- uj_r.T, - uj.T @ (Points[Pi, 0].sP + d)), axis=1)
-    Dj2 = np.array([[0, 0, - 1]])
+    Dj1 = np.concatenate((-uj_r.T, -uj.T @ (Points[Pi, 0].sP + d)), axis=1)
+    Dj2 = np.array([[0, 0, -1]])
     Dj = np.concatenate((Dj1, Dj2), axis=0)
     return Di, Dj
+
+
 ################################################################
 #
 # RHS
@@ -1112,21 +1316,21 @@ def RHSAcc(t):
     global nConst, nJ
     rhs = np.zeros((nConst, 1))
     for Ji in range(1, nJ):
-        if Joints[Ji, 0].type == 'rev':
+        if Joints[Ji, 0].type == "rev":
             f = A_rev(Ji)
-        if Joints[Ji, 0].type == 'tran':
+        if Joints[Ji, 0].type == "tran":
             f = A_tran(Ji)
-        if Joints[Ji, 0].type == 'rev_rev':
+        if Joints[Ji, 0].type == "rev_rev":
             f = A_rev_rev(Ji)
-        if Joints[Ji, 0].type == 'rev_tran':
+        if Joints[Ji, 0].type == "rev_tran":
             f = A_rev_tran(Ji)
-        if Joints[Ji, 0].type == 'rigid':
+        if Joints[Ji, 0].type == "rigid":
             f = A_rigid(Ji)
-        if Joints[Ji, 0].type == 'disc':
+        if Joints[Ji, 0].type == "disc":
             f = A_disc(Ji)
-        if Joints[Ji, 0].type == 'rel_rot':
+        if Joints[Ji, 0].type == "rel_rot":
             f = A_rel_rot(Ji, t)
-        if Joints[Ji, 0].type == 'rel_tran':
+        if Joints[Ji, 0].type == "rel_tran":
             f = A_rel_tran(Ji)
         rs = Joints[Ji, 0].rows - 1
         re = Joints[Ji, 0].rowe
@@ -1140,13 +1344,15 @@ def RHSVel(t):
     global nConst, nJ
     rhs = np.zeros((nConst, 1))
     for Ji in range(1, nJ):
-        if Joints[Ji, 0].type == 'rel - rot':
+        if Joints[Ji, 0].type == "rel - rot":
             V_rel_rot()
-            rhs[Joints[Ji, 0].rows - 1:Joints[Ji, 0].rowe] = f
-        if Joints[Ji, 0].type == 'rel - tran':
+            rhs[Joints[Ji, 0].rows - 1 : Joints[Ji, 0].rowe] = f
+        if Joints[Ji, 0].type == "rel - tran":
             V_rel_tran()
-            rhs[Joints[Ji, 0].rows - 1:Joints[Ji, 0].rowe] = f
+            rhs[Joints[Ji, 0].rows - 1 : Joints[Ji, 0].rowe] = f
     return rhs
+
+
 # ################################################################
 # #
 # # Structures
@@ -1158,119 +1364,119 @@ def RHSVel(t):
 # #%%% Body Structure
 # class Body_struct:
 #  -------------------------------------------------------------------------
-    # def __init__(self):
-    #    # self.m = 1                      # mass
-    #    # self.J = 1                      # moment of inertia
-    #    # self.r = np.array([[0, 0]]).T 	 # x, y coordinates
-    #    # self.p = 0                      # angle phi
-    #    # self.r_d = np.array([[0, 0]]).T    # time derivative of x and y
-    #    # self.p_d = 0                      # time derivative of phi
-    #    # self.A = np.eye(2)              # rotational transformation matrix
-    #    # self.r_dd = np.array([[0, 0]]).T    # x_double_dot,y_double_dot
-    #    # self.p_dd = 0                      # 2nd time derivative of phi  #  index of the 1st element of r in u or u_dot
-    #    # self.irc = 0                      # index of 1st element of r in u or u_dot
-    #    # self.irv = 0                      # index of the 1st element of r_dot in u or u_dot
-    #    # self.ira = 0                      # index of the 1st element of r_dot2 in v_dot
-    #    # self.m_inv = 1                         # mass inverse
-    #    # self.J_inv = 1                         # inverse of moment of inertia
-    #    # self.wgt = np.array([[0, 0]]).T       # weight of body as a force vector
-    #    # self.f = np.array([[0, 0]]).T       # sum of forces that act on the body
-    #    # self.n = 0                         # sum of moments that act on the body
-    #    # self.shape = ''                        # 'circle', 'rect', line
-    #    # self.R = 1                         # radius of the circle
-    #    # self.circ = np.array([[]]).T          # points on circumference of the circle
-    #    # self.W = 0                         # width of the rectangle
-    #    # self.H = 0                         # height of the rectangle
-    #    # self.color ='k'                        # default color for the body
-    #    # self.P4 = np.array([[]]).T          # corners of the rectangle
-    #    # self.pts = np.array([[]]).T          # point indexes associated with this body
-    #    # return
+# def __init__(self):
+#    # self.m = 1                      # mass
+#    # self.J = 1                      # moment of inertia
+#    # self.r = np.array([[0, 0]]).T 	 # x, y coordinates
+#    # self.p = 0                      # angle phi
+#    # self.r_d = np.array([[0, 0]]).T    # time derivative of x and y
+#    # self.p_d = 0                      # time derivative of phi
+#    # self.A = np.eye(2)              # rotational transformation matrix
+#    # self.r_dd = np.array([[0, 0]]).T    # x_double_dot,y_double_dot
+#    # self.p_dd = 0                      # 2nd time derivative of phi  #  index of the 1st element of r in u or u_dot
+#    # self.irc = 0                      # index of 1st element of r in u or u_dot
+#    # self.irv = 0                      # index of the 1st element of r_dot in u or u_dot
+#    # self.ira = 0                      # index of the 1st element of r_dot2 in v_dot
+#    # self.m_inv = 1                         # mass inverse
+#    # self.J_inv = 1                         # inverse of moment of inertia
+#    # self.wgt = np.array([[0, 0]]).T       # weight of body as a force vector
+#    # self.f = np.array([[0, 0]]).T       # sum of forces that act on the body
+#    # self.n = 0                         # sum of moments that act on the body
+#    # self.shape = ''                        # 'circle', 'rect', line
+#    # self.R = 1                         # radius of the circle
+#    # self.circ = np.array([[]]).T          # points on circumference of the circle
+#    # self.W = 0                         # width of the rectangle
+#    # self.H = 0                         # height of the rectangle
+#    # self.color ='k'                        # default color for the body
+#    # self.P4 = np.array([[]]).T          # corners of the rectangle
+#    # self.pts = np.array([[]]).T          # point indexes associated with this body
+#    # return
 # #%% Force Structure
 # class Force_struct:
-    #  -------------------------------------------------------------------------
-    # def __init__(self):
-    #    # self.type = 'ptp'                 # element type: ptp, rot_sda, weight, fp, f, T
-    #    # self.iPindex = 0                     # index of the head (arrow) point
-    #    # self.jPindex = 0                     # index of the tail point
-    #    # self.iBindex = 0                     # index of the head (arrow) body
-    #    # self.jBindex = 0                     # index of the tail body
-    #    # self.k = 0                     # spring stiffness
-    #    # self.L0 = 0                     # undeformed length
-    #    # self.theta0 = 0                     # undeformed angle
-    #    # self.dc = 0                     # damping coefficient
-    #    # self.f_a = 0                     # constant actuator force
-    #    # self.T_a = 0                     # constant actuator torque
-    #    # self.gravity = 9.81                  # gravitational constant
-    #    # self.wgt = np.array([[0, - 1]]).T  # gravitational direction
-    #    # self.flocal = np.array([[0, 0]]).T   # constant force in local frame
-    #    # self.f = np.array([[0, 0]]).T   # constant force in x - y frame
-    #    # self.t = 0                     # constant torque in x - y frame
-    #    # self.iFunct = 0
-    #    # return
+#  -------------------------------------------------------------------------
+# def __init__(self):
+#    # self.type = 'ptp'                 # element type: ptp, rot_sda, weight, fp, f, T
+#    # self.iPindex = 0                     # index of the head (arrow) point
+#    # self.jPindex = 0                     # index of the tail point
+#    # self.iBindex = 0                     # index of the head (arrow) body
+#    # self.jBindex = 0                     # index of the tail body
+#    # self.k = 0                     # spring stiffness
+#    # self.L0 = 0                     # undeformed length
+#    # self.theta0 = 0                     # undeformed angle
+#    # self.dc = 0                     # damping coefficient
+#    # self.f_a = 0                     # constant actuator force
+#    # self.T_a = 0                     # constant actuator torque
+#    # self.gravity = 9.81                  # gravitational constant
+#    # self.wgt = np.array([[0, - 1]]).T  # gravitational direction
+#    # self.flocal = np.array([[0, 0]]).T   # constant force in local frame
+#    # self.f = np.array([[0, 0]]).T   # constant force in x - y frame
+#    # self.t = 0                     # constant torque in x - y frame
+#    # self.iFunct = 0
+#    # return
 # #%%% Joint Structure
 # class Joint_struct:
-    #  -------------------------------------------------------------------------
-    # def __init__(self):
-    #    # self.type = 'rev'     # joint type: rev, tran, rev - rev, rev - tran, rigid, disc, rel - rot, rel - tran
-    #    # self.iBindex = 0         # body index i
-    #    # self.jBindex = 0         # body index j
-    #    # self.iPindex = 0         # point Pi index
-    #    # self.jPindex = 0         # point Pj index
-    #    # self.iUindex = 0         # unit vector u_i index
-    #    # self.jUindex = 0         # unit vector u_j index
-    #    # self.iFunct = 0         # analytical function index
-    #    # self.L = 0         # constant length
-    #    # self.R = 1                 # constant radius
-    #    # self.x0 = 0                 # initial condition x for disc
-    #    # self.p0 = 0                 # initial condition phi for a disc (or rigid)
-    #    # self.d0 = np.array([[]]).T  # initial condition for d (rigid)
-    #    # self.fix = 0                 # fix relative dof if = 1 (rev or tran)
-    #    # self.nboby = 2                 # number of moving bodies involved
-    #    # self.mrows = 2                 # number of rows (constraints)
-    #    # self.rows = 0               # row index - start
-    #    # self.rowe = 0               # row index - end
-    #    # self.colis = 0               # column index for body i - start
-    #    # self.colie = 0               # column index for body i - end
-    #    # self.coljs = 0               # column index for body j - start
-    #    # self.colje = 0               # column index for body j - end
-    #    # self.lagrange =np.zeros((3,1))  # Lagrange multipliers
-    #    # return
+#  -------------------------------------------------------------------------
+# def __init__(self):
+#    # self.type = 'rev'     # joint type: rev, tran, rev - rev, rev - tran, rigid, disc, rel - rot, rel - tran
+#    # self.iBindex = 0         # body index i
+#    # self.jBindex = 0         # body index j
+#    # self.iPindex = 0         # point Pi index
+#    # self.jPindex = 0         # point Pj index
+#    # self.iUindex = 0         # unit vector u_i index
+#    # self.jUindex = 0         # unit vector u_j index
+#    # self.iFunct = 0         # analytical function index
+#    # self.L = 0         # constant length
+#    # self.R = 1                 # constant radius
+#    # self.x0 = 0                 # initial condition x for disc
+#    # self.p0 = 0                 # initial condition phi for a disc (or rigid)
+#    # self.d0 = np.array([[]]).T  # initial condition for d (rigid)
+#    # self.fix = 0                 # fix relative dof if = 1 (rev or tran)
+#    # self.nboby = 2                 # number of moving bodies involved
+#    # self.mrows = 2                 # number of rows (constraints)
+#    # self.rows = 0               # row index - start
+#    # self.rowe = 0               # row index - end
+#    # self.colis = 0               # column index for body i - start
+#    # self.colie = 0               # column index for body i - end
+#    # self.coljs = 0               # column index for body j - start
+#    # self.colje = 0               # column index for body j - end
+#    # self.lagrange =np.zeros((3,1))  # Lagrange multipliers
+#    # return
 # #%%% Point Structure
 # class Point_struct:
-    #  -------------------------------------------------------------------------
-    # def __init__(self):
-    #    # self.Bindex = 0                     # body index
-    #    # self.sPlocal = np.array([[0, 0]]).T   # body - fixed coordinates
-    #    # self.sP = np.array([[0, 0]]).T   # x, y components of vector s
-    #    # self.sP_r = np.array([[0, 0]]).T   # vector s rotated
-    #    # self.rP = np.array([[0, 0]]).T   # x, y coordinates of the point
-    #    # self.sP_d = np.array([[0, 0]]).T   # s_P_dot
-    #    # self.rP_d = np.array([[0, 0]]).T   # r_P_dot
-    #    # self.rP_dd = np.array([[0, 0]]).T   # r_P_dot2
-    #    # return
+#  -------------------------------------------------------------------------
+# def __init__(self):
+#    # self.Bindex = 0                     # body index
+#    # self.sPlocal = np.array([[0, 0]]).T   # body - fixed coordinates
+#    # self.sP = np.array([[0, 0]]).T   # x, y components of vector s
+#    # self.sP_r = np.array([[0, 0]]).T   # vector s rotated
+#    # self.rP = np.array([[0, 0]]).T   # x, y coordinates of the point
+#    # self.sP_d = np.array([[0, 0]]).T   # s_P_dot
+#    # self.rP_d = np.array([[0, 0]]).T   # r_P_dot
+#    # self.rP_dd = np.array([[0, 0]]).T   # r_P_dot2
+#    # return
 # #%%% Unit Structure
 # class Unit_struct:
-    #  -------------------------------------------------------------------------
-    # def __init__(self):
-    #    # self.Bindex = 0                     # body index
-    #    # self.ulocal = np.array([[1, 0]]).T   # u_prime; xi and eta components
-    #    # self.u = np.array([[0, 0]]).T   # x, y components
-    #    # self.u_r = np.array([[0, 0]]).T   # vector u rotated
-    #    # self.u_d = np.array([[0, 0]]).T   # u_dot
-    #    # return
+#  -------------------------------------------------------------------------
+# def __init__(self):
+#    # self.Bindex = 0                     # body index
+#    # self.ulocal = np.array([[1, 0]]).T   # u_prime; xi and eta components
+#    # self.u = np.array([[0, 0]]).T   # x, y components
+#    # self.u_r = np.array([[0, 0]]).T   # vector u rotated
+#    # self.u_d = np.array([[0, 0]]).T   # u_dot
+#    # return
 # #%%% Function Structure
 # class Funct_struct:
-    #  -------------------------------------------------------------------------
-    # def __init__(self):
-    #    # self.type='a'                    # function type a, b, or c
-    #    # self.t_start=0                   # required for functions b, c
-    #    # self.f_start=0                   # required for functions b, c
-    #    # self.t_end=1                     # required for functions b, c
-    #    # self.f_end=1                     # required for functions b
-    #    # self.dfdt_end= 1                 # required for functions c
-    #    # self.ncoeff= 4                   # number of coefficients
-    #    # self.coeff=np.array([[]]).T      # required for function a
-    #    # return
+#  -------------------------------------------------------------------------
+# def __init__(self):
+#    # self.type='a'                    # function type a, b, or c
+#    # self.t_start=0                   # required for functions b, c
+#    # self.f_start=0                   # required for functions b, c
+#    # self.t_end=1                     # required for functions b, c
+#    # self.f_end=1                     # required for functions b
+#    # self.dfdt_end= 1                 # required for functions c
+#    # self.ncoeff= 4                   # number of coefficients
+#    # self.coeff=np.array([[]]).T      # required for function a
+#    # return
 # ###############################################################
 #
 # Transfer
@@ -1286,11 +1492,13 @@ def u_to_Bodies(u):
     for Bi in range(1, nB):
         ir = Bodies[Bi, 0].irc
         ird = Bodies[Bi, 0].irv
-        Bodies[Bi, 0].r = np.atleast_2d(u[ir:ir + 1 + 1].flatten()).T
+        Bodies[Bi, 0].r = np.atleast_2d(u[ir : ir + 1 + 1].flatten()).T
         Bodies[Bi, 0].p = u[ir + 2]
-        Bodies[Bi, 0].r_d = np.atleast_2d(u[ird:ird + 1 + 1].flatten()).T
+        Bodies[Bi, 0].r_d = np.atleast_2d(u[ird : ird + 1 + 1].flatten()).T
         Bodies[Bi, 0].p_d = u[ird + 2]
     return None
+
+
 # %%% Bodies_to_u
 
 
@@ -1303,8 +1511,12 @@ def Bodies_to_u(u):
     for Bi in range(1, nB):
         ir = Bodies[Bi, 0].irc
         ird = Bodies[Bi, 0].irv
-        u[ir:ir + 2 + 1] = np.atleast_2d(np.concatenate((Bodies[Bi, 0].r, Bodies[Bi, 0].p), axis=None)).T
-        u[ird:ird + 2 + 1] = np.atleast_2d(np.concatenate((Bodies[Bi, 0].r_d, Bodies[Bi, 0].p_d), axis=None)).T
+        u[ir : ir + 2 + 1] = np.atleast_2d(
+            np.concatenate((Bodies[Bi, 0].r, Bodies[Bi, 0].p), axis=None)
+        ).T
+        u[ird : ird + 2 + 1] = np.atleast_2d(
+            np.concatenate((Bodies[Bi, 0].r_d, Bodies[Bi, 0].p_d), axis=None)
+        ).T
     return u
 
 
@@ -1321,9 +1533,15 @@ def Bodies_to_u_d():
     for Bi in range(1, nB):
         ir = Bodies[Bi, 0].irc
         ird = Bodies[Bi, 0].irv
-        u_d[ir:ir + 2 + 1] = np.atleast_2d(np.concatenate((Bodies[Bi, 0].r_d, Bodies[Bi, 0].p_d), axis=None)).T
-        u_d[ird:ird + 2 + 1] = np.atleast_2d(np.concatenate((Bodies[Bi, 0].r_dd, Bodies[Bi, 0].p_dd), axis=None)).T
+        u_d[ir : ir + 2 + 1] = np.atleast_2d(
+            np.concatenate((Bodies[Bi, 0].r_d, Bodies[Bi, 0].p_d), axis=None)
+        ).T
+        u_d[ird : ird + 2 + 1] = np.atleast_2d(
+            np.concatenate((Bodies[Bi, 0].r_dd, Bodies[Bi, 0].p_dd), axis=None)
+        ).T
     return u_d
+
+
 ################################################################
 #
 # ANIMATION PLOTTER
@@ -1332,7 +1550,7 @@ def Bodies_to_u_d():
 
 
 #  -------------------------------------------------------------------------
-def plot_system():                    # 2D Animation
+def plot_system():  # 2D Animation
 
     global Bodies, nB, nB3, nB6
     global Points, nP, Points_anim, nPanim, nPtot
@@ -1346,19 +1564,19 @@ def plot_system():                    # 2D Animation
     global xmin, xmax, ymin, ymax
     global showtime, t10
     global flags, pen_d0
-# #### set axis limits
+    # #### set axis limits
     # max_val = max(xmax, ymax)
     # min_val = min(xmin, ymin)
     # plt.xlim(xmin, xmax)
     # plt.ylim(ymin, ymax)
-    plt.gca().set_aspect('equal')
-# #### Plot body centre points
+    plt.gca().set_aspect("equal")
+    # #### Plot body centre points
     for Bi in range(1, nB):
-        plt.plot(Bodies[Bi, 0].r[0, 0], Bodies[Bi, 0].r[1, 0], 'ko')
-        plt.text(Bodies[Bi, 0].r[0, 0], Bodies[Bi, 0].r[1, 0], '   (%i' % Bi)
-        plt.text(Bodies[Bi, 0].r[0, 0], Bodies[Bi, 0].r[1, 0], '      )')
+        plt.plot(Bodies[Bi, 0].r[0, 0], Bodies[Bi, 0].r[1, 0], "ko")
+        plt.text(Bodies[Bi, 0].r[0, 0], Bodies[Bi, 0].r[1, 0], "   (%i" % Bi)
+        plt.text(Bodies[Bi, 0].r[0, 0], Bodies[Bi, 0].r[1, 0], "      )")
     # plt.show()
-# #### Draw lines between body centers and points on those bodies
+    # #### Draw lines between body centers and points on those bodies
     print("NUmber of bodies ", nB)
     for Bi in range(1, nB):
         print("BODY INDEX", Bi)
@@ -1384,24 +1602,38 @@ def plot_system():                    # 2D Animation
             # print(Points
     # plt.show()
     # print("Number of points",nP)
-# #### Plot points that are defined by 's' vectors
+    # #### Plot points that are defined by 's' vectors
     for i in range(1, nP):
-        plt.plot(Points[i, 0].rP[0][0], Points[i, 0].rP[1][0], 'ko', markerfacecolor='k', markersize=2)
-        plt.plot(Points[i, 0].rP[0][0], Points[i, 0].rP[1][0], 'ko', markerfacecolor='k', markersize=2)
+        plt.plot(
+            Points[i, 0].rP[0][0],
+            Points[i, 0].rP[1][0],
+            "ko",
+            markerfacecolor="k",
+            markersize=2,
+        )
+        plt.plot(
+            Points[i, 0].rP[0][0],
+            Points[i, 0].rP[1][0],
+            "ko",
+            markerfacecolor="k",
+            markersize=2,
+        )
         print("POINTS")
         print(i)
         print(Points[i, 0].rP[0][0])
         print(Points[i, 0].rP[1][0])
     # plt.show()
-# #### Draw lines between points that are connected by springs
+    # #### Draw lines between points that are connected by springs
     for i in range(1, nF):
         #  define switch
         class switch(object):
-
-            def force_type(self, argument):                            # Dispatch method
+            def force_type(self, argument):  # Dispatch method
                 method_name = argument
-                method = getattr(self, method_name, lambda: "Invalid")  # Get the method from 'self'. Default to a lambda.
-                return method()                                        # Call the method as we return it
+                method = getattr(
+                    self, method_name, lambda: "Invalid"
+                )  # Get the method from 'self'. Default to a lambda.
+                return method()  # Call the method as we return it
+
             #  define "cases"
 
             def ptp(self):
@@ -1411,16 +1643,19 @@ def plot_system():                    # 2D Animation
                 a2 = Points[int(pt2), 0].rP[0][0]
                 b1 = Points[int(pt1), 0].rP[1][0]
                 b2 = Points[int(pt2), 0].rP[1][0]
-                plt.plot([a1, a2], [b1, b2], color='m', linestyle='-')
+                plt.plot([a1, a2], [b1, b2], color="m", linestyle="-")
+
         switch().force_type(Forces[i, 0].type)  # implement switch
     for Ji in range(1, nJ):
         #  define switch
         class switch(object):
-
-            def joint_type(self, argument):                            # Dispatch method
+            def joint_type(self, argument):  # Dispatch method
                 method_name = argument
-                method = getattr(self, method_name, lambda: "Invalid")  # Get the method from 'self'. Default to a lambda.
-                return method()                                        # Call the method as we return it
+                method = getattr(
+                    self, method_name, lambda: "Invalid"
+                )  # Get the method from 'self'. Default to a lambda.
+                return method()  # Call the method as we return it
+
             #  define "cases"
 
             def rev_rev(self):
@@ -1430,11 +1665,18 @@ def plot_system():                    # 2D Animation
                 a2 = Points[Pj, 0].rP[0][0]
                 b1 = Points[Pi, 0].rP[1][0]
                 b2 = Points[Pj, 0].rP[1][0]
-                plt.plot([a1, a2], [b1, b2], color='k')
+                plt.plot([a1, a2], [b1, b2], color="k")
 
             def rev_tran(self):
                 Pi = Joints[Ji, 0].iPindex
-                plt.plot(Points[Pi, 0].rP[0][0], Points[Pi - 1, 0].rP[1][0], 'ko', markerfacecolor='k', markersize=4)
+                plt.plot(
+                    Points[Pi, 0].rP[0][0],
+                    Points[Pi - 1, 0].rP[1][0],
+                    "ko",
+                    markerfacecolor="k",
+                    markersize=4,
+                )
+
         #  implement switch
         switch().joint_type(Joints[Ji, 0].type)
     for Bi in range(1, nB):
@@ -1442,36 +1684,53 @@ def plot_system():                    # 2D Animation
         #  define switch
 
         class switch(object):
-
             def body_shape(self, argument):  # Dispatch method
                 method_name = argument
-                method = getattr(self, method_name, lambda: "Invalid")  # Get the method from 'self'. Default to a lambda.
-                return method()                                        # Call the method as we return it
+                method = getattr(
+                    self, method_name, lambda: "Invalid"
+                )  # Get the method from 'self'. Default to a lambda.
+                return method()  # Call the method as we return it
+
             #  define "cases"
 
             def circle(self):
                 radius = Bodies[Bi, 0].R
                 w1x = Bodies[Bi, 0].r[0, 0]
                 w1y = Bodies[Bi, 0].r[1, 0]
-                w1 = plt.Circle((w1x, w1y), radius, color='k', fill=False)
+                w1 = plt.Circle((w1x, w1y), radius, color="k", fill=False)
                 plt.gca().add_patch(w1)
 
             def rect(self):
                 P5 = np.zeros((2, 5))
                 for i in range(0, 4):
-                    P5[:, i] = Bodies[Bi, 0].r.T + Bodies[Bi, 0].A @ Bodies[Bi, 0].P4[:, i].T
+                    P5[:, i] = (
+                        Bodies[Bi, 0].r.T + Bodies[Bi, 0].A @ Bodies[Bi, 0].P4[:, i].T
+                    )
                 P5[:, 5 - 1] = P5[:, 1 - 1]
                 for i in range(0, 4):
-                    plt.plot([P5[1 - 1, i], P5[1 - 1, i + 1]], [P5[2 - 1, i], P5[2 - 1, i + 1]], color='k')
+                    plt.plot(
+                        [P5[1 - 1, i], P5[1 - 1, i + 1]],
+                        [P5[2 - 1, i], P5[2 - 1, i + 1]],
+                        color="k",
+                    )
 
             def line(self):
                 P5 = np.zeros((2, 2))
                 for i in range(1 - 1, 2):
-                    P5[:, i] = Bodies[Bi, 0].r.T + Bodies[Bi, 0].A @ Bodies[Bi, 0].P4[:, i]
-                plt.plot([P5[1 - 1, 1 - 1], P5[1 - 1, 2 - 1]], [P5[2 - 1, 1 - 1], P5[2 - 1, 2 - 1]], color='k')
+                    P5[:, i] = (
+                        Bodies[Bi, 0].r.T + Bodies[Bi, 0].A @ Bodies[Bi, 0].P4[:, i]
+                    )
+                plt.plot(
+                    [P5[1 - 1, 1 - 1], P5[1 - 1, 2 - 1]],
+                    [P5[2 - 1, 1 - 1], P5[2 - 1, 2 - 1]],
+                    color="k",
+                )
+
         switch().body_shape(Bodies[Bi, 0].shape)  # implement switch
     plt.grid()
     return None
+
+
 # ###############################################################
 #
 # UPDATES
@@ -1534,107 +1793,107 @@ def Update_Velocity():
 # #TODO: not working
 #  -------------------------------------------------------------------------
 # def ic_correct():
-    # global Bodies, nB, nB3, nB6
-    # global Points, nP, Points_anim, nPanim, nPtot
-    # global Uvectors, nU
-    # global Joints, nJ, nConst
-    # global Forces, nF
-    # global M_array, M_inv_array
-    # global Functs, nFc
-    # global ZZ, redund, cfriction
-    # global num, D, Dt, Lambda
-    # global xmin, xmax, ymin, ymax
-    # global showtime, t10
-    # global flags, pen_d0
-    # flag = 0;
-    # for n in range(20):
-        # Update_Position();      #% Update position entities
-        # #TODO: should constraints have an input
-        # #Phi = Constraints(0); #% Evaluate constraints
-        # #TODO: I think something is wrong with this Phi construction
-        # Phi = Constraints(); #% Evaluate constraints
-        # print("Phi",Phi)
-        # D = Jacobian(0);       #% Evaluate Jacobian
-        # ff = np.sqrt(np.dot(Phi.T,Phi));  #% Are the constraints violated?
-        # if ff < 1.0e - 10:
-            # flag = 1;
-            # #break
-            # #print("BROKEN")
-        # #end
-            # #delta_c = - np.dot(D.T,(np.dot(D,D.T)))\Phi   # % Solve for corrections
-        # D_ = D[:, 0:3 * (nB - 1)]
-        # print("nConst",nConst)
-        # print("D",D_)
-        # print(np.dot(D_,D_.T))
-        # print("D",D)
-        # print(np.dot(D_.T, np.dot(D_,D_.T)))
-        # #delta_c = np.linalg.solve(- np.dot(D_.T,(np.dot(D_,D_.T))), Phi)
-        # #delta_c = np.dot(np.linalg.pinv(- np.dot(D_.T,(np.dot(D_,D_.T))).T), Phi)
-        # delta_c = - np.dot(D_.T, np.linalg.solve(np.dot(D_, D_.T), Phi))
-        # for Bi in  range(1,nB):        # % Correct estimates
-            # #ir = 1 + (Bi - 1) * 3;
-            # ir = (Bi - 1) * 3;
-            # print("ir",ir)
-            # #print("ir",ir)
-            # print("Bi", Bi)
-            # print("delta_c",delta_c)
-            # print("delta_c[ir:ir + 1]",delta_c[ir:ir + 2])
-            # #broken
-            # Bodies[Bi, 0].r = Bodies[Bi, 0].r + delta_c[ir:ir + 2, 0];
-            # Bodies[Bi, 0].p = Bodies[Bi, 0].p + delta_c[ir + 2, 0];
-        # #end
-    # #end
-        # if flag == 0:
-            # error(' Convergence failed in Newton - Raphson ');
-        # #end
-    # #% Velocity correction
-        # Phi2 = np.zeros(((nB - 1) * 3,1))
-        # for Bi in range(1,nB):    # % Move velocities to an arbitrary array Phi
-            # #ir = 1 + (Bi - 1) * 3;
-            # ir = (Bi - 1) * 3;
-            # print("ir",ir)
-            # print("Bi", Bi)
-            # print("Phi2",Phi2)
-            # print("nB",nB)
-            # print("Bodies[Bi].p_d",Bodies[Bi, 0].p_d)
-            # print("Biodes.r_d",Bodies[Bi, 0].r_d[:, 0])
-            # print("ir:ir + 1",ir,ir + 1)
-            # print("Phi[ir:ir + 2, 0]",Phi[ir:ir + 2, 0])
-            # Phi2[ir:ir + 2, 0] = Bodies[Bi, 0].r_d[:, 0]
-            # Phi2[ir + 2, 0] = Bodies[Bi, 0].p_d
-            # #0:3 * (nB - 1)
-            # #Phi[ir:ir + 2, 0] = np.array([[Bodies[Bi, 0].r_d, Bodies[Bi, 0].p_d]]);
-            # print("Phi2", Phi2)
-            # print("Bodies",Bodies)
-            # #print("Bodies(Bi)", Bodies(Bi))
-        # #end
-        # print("NCONST", nConst)
-        # rhs = RHSVel(0);
-        # print("rhs",rhs)
-        # #broken
-        # np.dot(D_, D_.T)
-        # np.dot(D_,Phi - rhs)
-        # #delta_v = np.dot(- D_.T,)
-        # #delta_v = - D' * ((D * D')\(D * Phi - rhs)); % Compute corrections
-        # #for Bi = 1:nB     % Move corrected velocities to sub - arrays
-            # #ir = 1 + (Bi - 1) * 3;
-            # #Bodies(Bi).r_d = Bodies(Bi).r_d + delta_v(ir:ir + 1);
-            # #Bodies(Bi).p_d = Bodies(Bi).p_d + delta_v(ir + 2);
-        # #end
-    # #% Report corrected coordinates and velocities
-        # #coords = zeros(nB,3); vels = zeros(nB,3);
-        # #for Bi = 1:nB
-            # #coords(Bi,:) = [Bodies(Bi).r'  Bodies(Bi).p];
-            # #vels(Bi,:) = [Bodies(Bi).r_d'  Bodies(Bi).p_d];
-        # #end
-        # #display(' ')
-        # #display('Corrected coordinates')
-        # #display(' x           y           phi')
-        # #display(num2str(coords))
-        # #display('Corrected velocities')
-        # #display(' x - dot       y - dot       phi - dot')
-        # #display(num2str(vels))
-        # #display(' ')
+# global Bodies, nB, nB3, nB6
+# global Points, nP, Points_anim, nPanim, nPtot
+# global Uvectors, nU
+# global Joints, nJ, nConst
+# global Forces, nF
+# global M_array, M_inv_array
+# global Functs, nFc
+# global ZZ, redund, cfriction
+# global num, D, Dt, Lambda
+# global xmin, xmax, ymin, ymax
+# global showtime, t10
+# global flags, pen_d0
+# flag = 0;
+# for n in range(20):
+# Update_Position();      #% Update position entities
+# #TODO: should constraints have an input
+# #Phi = Constraints(0); #% Evaluate constraints
+# #TODO: I think something is wrong with this Phi construction
+# Phi = Constraints(); #% Evaluate constraints
+# print("Phi",Phi)
+# D = Jacobian(0);       #% Evaluate Jacobian
+# ff = np.sqrt(np.dot(Phi.T,Phi));  #% Are the constraints violated?
+# if ff < 1.0e - 10:
+# flag = 1;
+# #break
+# #print("BROKEN")
+# #end
+# #delta_c = - np.dot(D.T,(np.dot(D,D.T)))\Phi   # % Solve for corrections
+# D_ = D[:, 0:3 * (nB - 1)]
+# print("nConst",nConst)
+# print("D",D_)
+# print(np.dot(D_,D_.T))
+# print("D",D)
+# print(np.dot(D_.T, np.dot(D_,D_.T)))
+# #delta_c = np.linalg.solve(- np.dot(D_.T,(np.dot(D_,D_.T))), Phi)
+# #delta_c = np.dot(np.linalg.pinv(- np.dot(D_.T,(np.dot(D_,D_.T))).T), Phi)
+# delta_c = - np.dot(D_.T, np.linalg.solve(np.dot(D_, D_.T), Phi))
+# for Bi in  range(1,nB):        # % Correct estimates
+# #ir = 1 + (Bi - 1) * 3;
+# ir = (Bi - 1) * 3;
+# print("ir",ir)
+# #print("ir",ir)
+# print("Bi", Bi)
+# print("delta_c",delta_c)
+# print("delta_c[ir:ir + 1]",delta_c[ir:ir + 2])
+# #broken
+# Bodies[Bi, 0].r = Bodies[Bi, 0].r + delta_c[ir:ir + 2, 0];
+# Bodies[Bi, 0].p = Bodies[Bi, 0].p + delta_c[ir + 2, 0];
+# #end
+# #end
+# if flag == 0:
+# error(' Convergence failed in Newton - Raphson ');
+# #end
+# #% Velocity correction
+# Phi2 = np.zeros(((nB - 1) * 3,1))
+# for Bi in range(1,nB):    # % Move velocities to an arbitrary array Phi
+# #ir = 1 + (Bi - 1) * 3;
+# ir = (Bi - 1) * 3;
+# print("ir",ir)
+# print("Bi", Bi)
+# print("Phi2",Phi2)
+# print("nB",nB)
+# print("Bodies[Bi].p_d",Bodies[Bi, 0].p_d)
+# print("Biodes.r_d",Bodies[Bi, 0].r_d[:, 0])
+# print("ir:ir + 1",ir,ir + 1)
+# print("Phi[ir:ir + 2, 0]",Phi[ir:ir + 2, 0])
+# Phi2[ir:ir + 2, 0] = Bodies[Bi, 0].r_d[:, 0]
+# Phi2[ir + 2, 0] = Bodies[Bi, 0].p_d
+# #0:3 * (nB - 1)
+# #Phi[ir:ir + 2, 0] = np.array([[Bodies[Bi, 0].r_d, Bodies[Bi, 0].p_d]]);
+# print("Phi2", Phi2)
+# print("Bodies",Bodies)
+# #print("Bodies(Bi)", Bodies(Bi))
+# #end
+# print("NCONST", nConst)
+# rhs = RHSVel(0);
+# print("rhs",rhs)
+# #broken
+# np.dot(D_, D_.T)
+# np.dot(D_,Phi - rhs)
+# #delta_v = np.dot(- D_.T,)
+# #delta_v = - D' * ((D * D')\(D * Phi - rhs)); % Compute corrections
+# #for Bi = 1:nB     % Move corrected velocities to sub - arrays
+# #ir = 1 + (Bi - 1) * 3;
+# #Bodies(Bi).r_d = Bodies(Bi).r_d + delta_v(ir:ir + 1);
+# #Bodies(Bi).p_d = Bodies(Bi).p_d + delta_v(ir + 2);
+# #end
+# #% Report corrected coordinates and velocities
+# #coords = zeros(nB,3); vels = zeros(nB,3);
+# #for Bi = 1:nB
+# #coords(Bi,:) = [Bodies(Bi).r'  Bodies(Bi).p];
+# #vels(Bi,:) = [Bodies(Bi).r_d'  Bodies(Bi).p_d];
+# #end
+# #display(' ')
+# #display('Corrected coordinates')
+# #display(' x           y           phi')
+# #display(num2str(coords))
+# #display('Corrected velocities')
+# #display(' x - dot       y - dot       phi - dot')
+# #display(num2str(vels))
+# #display(' ')
 #######################################################################
 #
 # MAIN SOLVER
@@ -1662,12 +1921,12 @@ def readInputFiles():
     global showtime, t10
     global flags, pen_d0
     print("Reading input files")
-    exec(open(os.path.join(folder, 'inBodies.py')).read())
-    exec(open(os.path.join(folder, 'inForces.py')).read())
-    exec(open(os.path.join(folder, 'inFuncts.py')).read())
-    exec(open(os.path.join(folder, 'inJoints.py')).read())
-    exec(open(os.path.join(folder, 'inPoints.py')).read())
-    exec(open(os.path.join(folder, 'inUvectors.py')).read())
+    exec(open(os.path.join(folder, "inBodies.py")).read())
+    exec(open(os.path.join(folder, "inForces.py")).read())
+    exec(open(os.path.join(folder, "inFuncts.py")).read())
+    exec(open(os.path.join(folder, "inJoints.py")).read())
+    exec(open(os.path.join(folder, "inPoints.py")).read())
+    exec(open(os.path.join(folder, "inUvectors.py")).read())
     print("Bodies inside DapTemp", Bodies)
 
 
@@ -1694,17 +1953,17 @@ def solve():
     global solution_success
     global Tarray
     solution_success = False
-    exec(open(os.path.join(folder, 'dapInputSettings.py')).read())
+    exec(open(os.path.join(folder, "dapInputSettings.py")).read())
     u = np.zeros((6 * (nB), 1))
     u = Bodies_to_u(u)
     Tspan = np.arange(t_initial, t_final, dt)
     Tarray = np.zeros((len(Tspan), len(u)))
     Tarray[0, :] = np.concatenate((u), axis=None)
     r = integrate.ode(analysis).set_integrator("dop853")  # choice of method
-    r.set_initial_value(u, t_initial)                     # initial values
+    r.set_initial_value(u, t_initial)  # initial values
     for i in range(1, Tspan.size):
         Tarray[i, :] = np.concatenate((r.integrate(Tspan[i])), axis=None)
-    Tarray_final = Tarray[:, 1:(6 * (nB - 1) + 1)]  # Assigned to but never used
+    Tarray_final = Tarray[:, 1 : (6 * (nB - 1) + 1)]  # Assigned to but never used
     if not r.successful():
         raise RuntimeError("Could not integrate")
     solution_success = True
@@ -1730,18 +1989,18 @@ def writeOutputs():
     global write_success
     write_success = False
     Tspan = np.arange(t_initial, t_final, dt)
-    nt = len(Tspan)                # number of time steps
-    r = np.zeros((nt, nB, 2))       # translational coordinates
-    rd = np.zeros((nt, nB, 2))       # translational velocities
-    rdd = np.zeros((nt, nB, 2))       # #translational acceleration
-    p = np.zeros((nt, nB))         # rotational coordinate
-    pd = np.zeros((nt, nB))         # angular velocity
-    pdd = np.zeros((nt, nB))         # angular acceleration
-    rP = np.zeros((nt, nP, 2))       # coordinates of points
-    rPd = np.zeros((nt, nP, 2))       # velocity of points
+    nt = len(Tspan)  # number of time steps
+    r = np.zeros((nt, nB, 2))  # translational coordinates
+    rd = np.zeros((nt, nB, 2))  # translational velocities
+    rdd = np.zeros((nt, nB, 2))  # #translational acceleration
+    p = np.zeros((nt, nB))  # rotational coordinate
+    pd = np.zeros((nt, nB))  # angular velocity
+    pdd = np.zeros((nt, nB))  # angular acceleration
+    rP = np.zeros((nt, nP, 2))  # coordinates of points
+    rPd = np.zeros((nt, nP, 2))  # velocity of points
     Jac = np.zeros((nt, nConst, nB3))  # Jacobian matrix
-    Lam = np.zeros((nt, nConst))     # Lagrange multipliers
-    eng = np.zeros((nt, 3))          # Energy (kinetic, potential, total)
+    Lam = np.zeros((nt, nConst))  # Lagrange multipliers
+    eng = np.zeros((nt, 3))  # Energy (kinetic, potential, total)
     for i in range(0, nt):
         t = Tspan[i]
         u = Tarray[i, :].T
@@ -1761,24 +2020,36 @@ def writeOutputs():
             Jac[i, :, :] = D
             Lam[i, :] = Lambda.T
         #  Compute kinetic and potential energies
-        kin = ((Tarray[i, 3 * (nB - 1) + 1:(6 * (nB - 1) + 1)]) @ ((M_array_ @ np.atleast_2d(Tarray[i, 3 * (nB - 1) + 1:(6 * (nB - 1) + 1)].T)))) / 2
+        kin = (
+            (Tarray[i, 3 * (nB - 1) + 1 : (6 * (nB - 1) + 1)])
+            @ (
+                (
+                    M_array_
+                    @ np.atleast_2d(Tarray[i, 3 * (nB - 1) + 1 : (6 * (nB - 1) + 1)].T)
+                )
+            )
+        ) / 2
         potential = 0
         for Fi in range(1, nF):
-            if Forces[Fi, 0].type == 'weight':
+            if Forces[Fi, 0].type == "weight":
                 for Bi in range(1, nB):
-                    potential = potential - Bodies[Bi, 0].wgt.T @ Bodies[Bi, 0].r  # #### np.dot()?????
-            if Forces[Fi, 0].type == 'ptp':
+                    potential = (
+                        potential - Bodies[Bi, 0].wgt.T @ Bodies[Bi, 0].r
+                    )  # #### np.dot()?????
+            if Forces[Fi, 0].type == "ptp":
                 SDA_ptp(Fi)
-                potential = potential + 0.5 * Forces[Fi, 0].k * delta_ptp**2
-            if Forces[Fi, 0].type == 'rot_sda':
+                potential = potential + 0.5 * Forces[Fi, 0].k * delta_ptp ** 2
+            if Forces[Fi, 0].type == "rot_sda":
                 SDA_rot(Fi)
-            if Forces[Fi, 0].type == 'flocal':
+            if Forces[Fi, 0].type == "flocal":
                 Bi = Forces[Fi, 0].iBindex
-                Bodies[Bi, 0].f = Bodies[Bi, 0].f + Bodies[Bi, 0].A * Forces[Fi, 0].flocal
-            if Forces[Fi, 0].type == 'f':
+                Bodies[Bi, 0].f = (
+                    Bodies[Bi, 0].f + Bodies[Bi, 0].A * Forces[Fi, 0].flocal
+                )
+            if Forces[Fi, 0].type == "f":
                 Bi = Forces[Fi, 0].iBindex
                 Bodies[Bi, 0].f = Bodies[Bi, 0].f + Forces[Fi, 0].f
-            if Forces[Fi, 0].type == 'trq':
+            if Forces[Fi, 0].type == "trq":
                 Bi = Forces[Fi, 0].iBindex
                 Bodies[Bi, 0].n = Bodies[Bi, 0].n + Forces[Fi, 0].trq
             # NOTE: TODO include user force
@@ -1803,27 +2074,33 @@ def writeOutputs():
             #        # print('Undefined User Force')
         tot = kin + potential
         eng[i, :] = np.concatenate((kin[0], potential[0, 0], tot[0, 0]), axis=None)
-    print('Done')
+    print("Done")
     # WRITE OUTPUT TO FILES
     time_size = 5
     num_size = 15
     # write out positions, velocities and accelerations
-    bodyPositionsFid = open(os.path.join(folder, "DapBodyPositions"), 'w')
-    bodyVelocitiesFid = open(os.path.join(folder, "DapBodyVelocities"), 'w')
-    bodyAcclerationFid = open(os.path.join(folder, "DapBodyAccelerations"), 'w')
+    bodyPositionsFid = open(os.path.join(folder, "DapBodyPositions"), "w")
+    bodyVelocitiesFid = open(os.path.join(folder, "DapBodyVelocities"), "w")
+    bodyAcclerationFid = open(os.path.join(folder, "DapBodyAccelerations"), "w")
     bodyPositionsFid.write("{}".format(str("Time").ljust(time_size)))
     bodyVelocitiesFid.write("{}".format(str("Time").ljust(time_size)))
     bodyAcclerationFid.write("{}".format(str("Time").ljust(time_size)))
     for Bi in range(1, nB):
-        bodyPositionsFid.write("{}".format(("Body" + str(Bi) + '_x').rjust(num_size)))
-        bodyPositionsFid.write("{}".format(("Body" + str(Bi) + '_y').rjust(num_size)))
-        bodyPositionsFid.write("{}".format(("Body" + str(Bi) + '_angle').rjust(num_size)))
-        bodyVelocitiesFid.write("{}".format(("Body" + str(Bi) + '_x').rjust(num_size)))
-        bodyVelocitiesFid.write("{}".format(("Body" + str(Bi) + '_y').rjust(num_size)))
-        bodyVelocitiesFid.write("{}".format(("Body" + str(Bi) + '_angle').rjust(num_size)))
-        bodyAcclerationFid.write("{}".format(("Body" + str(Bi) + '_x').rjust(num_size)))
-        bodyAcclerationFid.write("{}".format(("Body" + str(Bi) + '_y').rjust(num_size)))
-        bodyAcclerationFid.write("{}".format(("Body" + str(Bi) + '_angle').rjust(num_size)))
+        bodyPositionsFid.write("{}".format(("Body" + str(Bi) + "_x").rjust(num_size)))
+        bodyPositionsFid.write("{}".format(("Body" + str(Bi) + "_y").rjust(num_size)))
+        bodyPositionsFid.write(
+            "{}".format(("Body" + str(Bi) + "_angle").rjust(num_size))
+        )
+        bodyVelocitiesFid.write("{}".format(("Body" + str(Bi) + "_x").rjust(num_size)))
+        bodyVelocitiesFid.write("{}".format(("Body" + str(Bi) + "_y").rjust(num_size)))
+        bodyVelocitiesFid.write(
+            "{}".format(("Body" + str(Bi) + "_angle").rjust(num_size))
+        )
+        bodyAcclerationFid.write("{}".format(("Body" + str(Bi) + "_x").rjust(num_size)))
+        bodyAcclerationFid.write("{}".format(("Body" + str(Bi) + "_y").rjust(num_size)))
+        bodyAcclerationFid.write(
+            "{}".format(("Body" + str(Bi) + "_angle").rjust(num_size))
+        )
     # fid.write()
     bodyPositionsFid.write("\n")
     bodyVelocitiesFid.write("\n")
@@ -1833,15 +2110,15 @@ def writeOutputs():
         bodyVelocitiesFid.write("{}".format(str(Tspan[i]).ljust(time_size)))
         bodyAcclerationFid.write("{}".format(str(Tspan[i]).ljust(time_size)))
         for Bi in range(1, nB):
-            bodyPositionsFid.write("{:15f}{:15f}{:15f}".format(r[i][Bi][0],
-                                                               r[i][Bi][1],
-                                                               p[i][Bi]))
-            bodyVelocitiesFid.write("{:15f}{:15f}{:15f}".format(rd[i][Bi][0],
-                                                                rd[i][Bi][1],
-                                                                pd[i][Bi]))
-            bodyAcclerationFid.write("{:15f}{:15f}{:15f}".format(rdd[i][Bi][0],
-                                                                 rdd[i][Bi][1],
-                                                                 pdd[i][Bi]))
+            bodyPositionsFid.write(
+                "{:15f}{:15f}{:15f}".format(r[i][Bi][0], r[i][Bi][1], p[i][Bi])
+            )
+            bodyVelocitiesFid.write(
+                "{:15f}{:15f}{:15f}".format(rd[i][Bi][0], rd[i][Bi][1], pd[i][Bi])
+            )
+            bodyAcclerationFid.write(
+                "{:15f}{:15f}{:15f}".format(rdd[i][Bi][0], rdd[i][Bi][1], pdd[i][Bi])
+            )
         bodyPositionsFid.write("\n")
         bodyVelocitiesFid.write("\n")
         bodyAcclerationFid.write("\n")
@@ -1849,38 +2126,41 @@ def writeOutputs():
     bodyVelocitiesFid.close()
     bodyAcclerationFid.close()
     # write out system energy
-    energyFid = open(os.path.join(folder, "DapSystemEnergy"), 'w')
-    energyFid.write("{}{}{}{}".format(str("Time").ljust(time_size),
-                                      str("Kinetic").rjust(num_size),
-                                      str("Potential").rjust(num_size),
-                                      str("Total").rjust(num_size)))
+    energyFid = open(os.path.join(folder, "DapSystemEnergy"), "w")
+    energyFid.write(
+        "{}{}{}{}".format(
+            str("Time").ljust(time_size),
+            str("Kinetic").rjust(num_size),
+            str("Potential").rjust(num_size),
+            str("Total").rjust(num_size),
+        )
+    )
     energyFid.write("\n")
     for i in range(nt):
-        energyFid.write("{}{:15e}{:15e}{:15e}".format(str(Tspan[i]).ljust(time_size),
-                                                      eng[i, 0],
-                                                      eng[i, 1],
-                                                      eng[i, 2]))
+        energyFid.write(
+            "{}{:15e}{:15e}{:15e}".format(
+                str(Tspan[i]).ljust(time_size), eng[i, 0], eng[i, 1], eng[i, 2]
+            )
+        )
         energyFid.write("\n")
     energyFid.close()
-    pointsFid = open(os.path.join(folder, "DapPointsPositions"), 'w')
-    pointsVelFid = open(os.path.join(folder, "DapPointsVelocities"), 'w')
+    pointsFid = open(os.path.join(folder, "DapPointsPositions"), "w")
+    pointsVelFid = open(os.path.join(folder, "DapPointsVelocities"), "w")
     pointsFid.write("{}".format(str("Time").ljust(time_size)))
     pointsVelFid.write("{}".format(str("Time").ljust(time_size)))
     for Pi in range(1, nP):
-        pointsFid.write("{}".format(("Point" + str(Pi) + '_x').rjust(num_size)))
-        pointsFid.write("{}".format(("Point" + str(Pi) + '_y').rjust(num_size)))
-        pointsVelFid.write("{}".format(("Point" + str(Pi) + '_x').rjust(num_size)))
-        pointsVelFid.write("{}".format(("Point" + str(Pi) + '_y').rjust(num_size)))
+        pointsFid.write("{}".format(("Point" + str(Pi) + "_x").rjust(num_size)))
+        pointsFid.write("{}".format(("Point" + str(Pi) + "_y").rjust(num_size)))
+        pointsVelFid.write("{}".format(("Point" + str(Pi) + "_x").rjust(num_size)))
+        pointsVelFid.write("{}".format(("Point" + str(Pi) + "_y").rjust(num_size)))
     pointsFid.write("\n")
     pointsVelFid.write("\n")
     for i in range(0, nt):
         pointsFid.write("{}".format(str(Tspan[i]).ljust(time_size)))
         pointsVelFid.write("{}".format(str(Tspan[i]).ljust(time_size)))
         for Pi in range(1, nP):
-            pointsFid.write("{:15f}{:15f}".format(rP[i][Pi][0],
-                                                  rP[i][Pi][1]))
-            pointsVelFid.write("{:15f}{:15f}".format(rPd[i][Pi][0],
-                                                     rPd[i][Pi][1]))
+            pointsFid.write("{:15f}{:15f}".format(rP[i][Pi][0], rP[i][Pi][1]))
+            pointsVelFid.write("{:15f}{:15f}".format(rPd[i][Pi][0], rPd[i][Pi][1]))
         pointsFid.write("\n")
         pointsVelFid.write("\n")
     pointsFid.close()

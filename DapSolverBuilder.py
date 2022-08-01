@@ -36,15 +36,11 @@
 
 import FreeCAD
 import DapTools
-
-from math import sin, cos, acos
+import math
 import os
 import sys
 import numpy as np
-from PySide import QtCore
-from PySide.QtCore import QProcess
-
-# from PySide.QtCore import QProcess
+import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -491,7 +487,7 @@ class DapSolverBuilder:
         """
         z = FreeCAD.Vector(0, 0, 1)
         # rotation_angle
-        phi = acos(self.plane_norm * z)
+        phi = math.acos(self.plane_norm * z)
         # axis_of_rotation
         u = self.plane_norm.cross(z)
         # FreeCAD.Console.PrintMessage("U: " + str(u) + "\n")
@@ -499,15 +495,15 @@ class DapSolverBuilder:
         if u.Length > 0:
             u /= u.Length
         rotation_matrix = FreeCAD.Matrix()
-        rotation_matrix.A11 = cos(phi) + u.x ** 2 * (1 - cos(phi))
-        rotation_matrix.A21 = u.y * u.x * (1 - cos(phi)) + u.z * sin(phi)
-        rotation_matrix.A31 = u.z * u.x * (1 - cos(phi)) - u.y * sin(phi)
-        rotation_matrix.A12 = u.x * u.y * (1 - cos(phi)) - u.z * sin(phi)
-        rotation_matrix.A22 = cos(phi) + u.y ** 2 * (1 - cos(phi))
-        rotation_matrix.A32 = u.z * u.y * (1 - cos(phi)) + u.x * sin(phi)
-        rotation_matrix.A13 = u.x * u.z * (1 - cos(phi)) + u.y * sin(phi)
-        rotation_matrix.A23 = u.y * u.z * (1 - cos(phi)) - u.x * sin(phi)
-        rotation_matrix.A33 = cos(phi) + u.z ** 2 * (1 - cos(phi))
+        rotation_matrix.A11 = math.cos(phi) + u.x ** 2 * (1 - math.cos(phi))
+        rotation_matrix.A21 = u.y * u.x * (1 - math.cos(phi)) + u.z * math.sin(phi)
+        rotation_matrix.A31 = u.z * u.x * (1 - math.cos(phi)) - u.y * math.sin(phi)
+        rotation_matrix.A12 = u.x * u.y * (1 - math.cos(phi)) - u.z * math.sin(phi)
+        rotation_matrix.A22 = math.cos(phi) + u.y ** 2 * (1 - math.cos(phi))
+        rotation_matrix.A32 = u.z * u.y * (1 - math.cos(phi)) + u.x * math.sin(phi)
+        rotation_matrix.A13 = u.x * u.z * (1 - math.cos(phi)) + u.y * math.sin(phi)
+        rotation_matrix.A23 = u.y * u.z * (1 - math.cos(phi)) - u.x * math.sin(phi)
+        rotation_matrix.A33 = math.cos(phi) + u.z ** 2 * (1 - math.cos(phi))
         return rotation_matrix
 
     #  -------------------------------------------------------------------------
@@ -876,9 +872,9 @@ class DapSolverBuilder:
         self.resultsAvailable = False
         self.obj.DapResults = None
         # pythonCommand = "python3 " + str(dap_solver) + " " + str(self.folder)
-        # from PySide.QtCore import QProcess
-        # process = QProcess()
-        # self.process = QtCore.QProcess()
+        # from PySide.QtCore import PySide.QtCore.QProcess
+        # process = PySide.QtCore.QProcess()
+        # self.process = QtCore.PySide.QtCore.QProcess()
         # self.process.finished.connect(self.onFinished)
         # self.process.start("python3",[str(dap_solver), str(self.folder)])
         # self.process.start(pythonCommand)

@@ -38,13 +38,12 @@
 import FreeCAD
 import os
 import DapTools
-from DapTools import addObjectProperty
-from pivy import coin
+import pivy
 import Part
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -82,15 +81,15 @@ class _CommandDapSolver:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon7.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP(
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Solver_alias", "Run the analysis"
             ),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
                 "Dap_Solver_alias", "Run the analysis."
             ),
         }
@@ -132,16 +131,16 @@ class _DapSolver:
     #  -------------------------------------------------------------------------
     def initProperties(self, obj):
         """ """
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "XVector", 0.0, "App::PropertyFloat", "", "Vector in X-Direction"
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "YVector", 0.0, "App::PropertyFloat", "", "Vector in Y-Direction"
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "ZVector", 0.0, "App::PropertyFloat", "", "Vector in Z-Direction"
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "FileDirectory",
             "",
@@ -149,7 +148,7 @@ class _DapSolver:
             "",
             "Location where Solver Results will be Stored",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "MotionPlane",
             MOTION_PLANES,
@@ -157,7 +156,7 @@ class _DapSolver:
             "",
             "Plane of Motion",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "SelectionType",
             SELECTION_TYPE,
@@ -165,8 +164,8 @@ class _DapSolver:
             "",
             "Type of Custom Plane Selection",
         )
-        # addObjectProperty(obj, 'ObjectEntities', [], "App::PropertyStringList", "", "Objects used for Plane Definition")
-        addObjectProperty(
+        # DapTools.addObjectProperty(obj, 'ObjectEntities', [], "App::PropertyStringList", "", "Objects used for Plane Definition")
+        DapTools.addObjectProperty(
             obj,
             "PlaneObjectName",
             "",
@@ -174,9 +173,13 @@ class _DapSolver:
             "",
             "Name of object to create custom plane of motion",
         )
-        addObjectProperty(obj, "StartTime", 0.0, "App::PropertyFloat", "", "Start Time")
-        addObjectProperty(obj, "EndTime", 0.5, "App::PropertyFloat", "", "Start Time")
-        addObjectProperty(
+        DapTools.addObjectProperty(
+            obj, "StartTime", 0.0, "App::PropertyFloat", "", "Start Time"
+        )
+        DapTools.addObjectProperty(
+            obj, "EndTime", 0.5, "App::PropertyFloat", "", "Start Time"
+        )
+        DapTools.addObjectProperty(
             obj,
             "ReportingTimeStep",
             0.01,
@@ -184,7 +187,7 @@ class _DapSolver:
             "",
             "Time intervals for the solution",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "UnitVector",
             FreeCAD.Vector(0, 0, 0),
@@ -192,33 +195,47 @@ class _DapSolver:
             "",
             "Vector Normal to Planar Motion",
         )
-        addObjectProperty(obj, "DapResults", None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(
+        DapTools.addObjectProperty(
+            obj, "DapResults", None, "App::PropertyPythonObject", "", ""
+        )
+        DapTools.addObjectProperty(
             obj, "ReportedTimes", None, "App::PropertyPythonObject", "", ""
         )
-        # addObjectProperty(obj, 'BodiesCoG', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, "Bodies_r", None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, "Bodies_p", None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, "Points_r", None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, "Points_r_d", None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, "Bodies_p_d", None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, "Bodies_r_d", None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(
+        # DapTools.addObjectProperty(obj, 'BodiesCoG', None, "App::PropertyPythonObject", "", "")
+        DapTools.addObjectProperty(
+            obj, "Bodies_r", None, "App::PropertyPythonObject", "", ""
+        )
+        DapTools.addObjectProperty(
+            obj, "Bodies_p", None, "App::PropertyPythonObject", "", ""
+        )
+        DapTools.addObjectProperty(
+            obj, "Points_r", None, "App::PropertyPythonObject", "", ""
+        )
+        DapTools.addObjectProperty(
+            obj, "Points_r_d", None, "App::PropertyPythonObject", "", ""
+        )
+        DapTools.addObjectProperty(
+            obj, "Bodies_p_d", None, "App::PropertyPythonObject", "", ""
+        )
+        DapTools.addObjectProperty(
+            obj, "Bodies_r_d", None, "App::PropertyPythonObject", "", ""
+        )
+        DapTools.addObjectProperty(
             obj, "Bodies_p_d_d", None, "App::PropertyPythonObject", "", ""
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "Bodies_r_d_d", None, "App::PropertyPythonObject", "", ""
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "kinetic_energy", None, "App::PropertyPythonObject", "", ""
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "potential_energy", None, "App::PropertyPythonObject", "", ""
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj, "total_energy", None, "App::PropertyPythonObject", "", ""
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "object_to_point",
             {},
@@ -226,7 +243,7 @@ class _DapSolver:
             "",
             "Dictionary linking FC object (eg joint) to DAP point, required for postProcessing",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "object_to_moving_body",
             {},
@@ -234,7 +251,7 @@ class _DapSolver:
             "",
             "Dictionary linking FC object to DAP body, required for postProcessing (only moving bodies used)",
         )
-        addObjectProperty(
+        DapTools.addObjectProperty(
             obj,
             "global_rotation_matrix",
             FreeCAD.Matrix(),
@@ -357,7 +374,7 @@ class _ViewProviderDapSolver:
         """ """
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.standard = coin.SoGroup()
+        self.standard = pivy.coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
         # self.ViewObject.Transparency = 95
         return

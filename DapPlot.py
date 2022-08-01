@@ -40,7 +40,7 @@ import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    import PySide
 
 # Select if we want to be in debug mode
 global Debug
@@ -54,13 +54,17 @@ class _CommandDapPlot:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """Called by FreeCAD when addCommand is run in InitGui.py
+        """Called by FreeCAD when 'FreeCADGui.addCommand' is run in InitGui.py
         Returns a dictionary defining the icon, the menu text and the tooltip"""
 
         return {
             "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon9.png"),
-            "MenuText": QtCore.QT_TRANSLATE_NOOP("Dap_Plot_alias", "Plot results"),
-            "ToolTip": QtCore.QT_TRANSLATE_NOOP("Dap_Plot_alias", "Plot results"),
+            "MenuText": PySide.QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Plot_alias", "Plot results"
+            ),
+            "ToolTip": PySide.QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Plot_alias", "Plot results"
+            ),
         }
 
     #  -------------------------------------------------------------------------
