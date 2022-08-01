@@ -34,9 +34,8 @@
 # *                                                                                  *
 # ************************************************************************************
 
-import FreeCAD
-
 import os
+import FreeCAD
 import DapTools
 import numpy as np
 import math
@@ -70,7 +69,7 @@ class TaskPanelDapAnimate:
         self.animation_body_objects = FreeCAD.ActiveDocument.Objects
 
         # Transfer the called parameters to the instance variables
-        self.obj = solver_object
+        self.solver_object = solver_object
         self.solver_document = solver_document
         self.animation_document = animation_document
         self.results = np.array(solver_object.DapResults)
@@ -84,12 +83,12 @@ class TaskPanelDapAnimate:
         # Set the scale to convert from meters to mm
         self.scale = 1.0e3
 
-        # Transfer the values from the obj object (i.e. solver_object) to instance variables
-        self.t_initial = self.obj.StartTime
-        self.t_final = self.obj.EndTime
-        self.reporting_time_step = self.obj.ReportingTimeStep
-        self.plane_norm = self.obj.UnitVector
-        self.reportedTimes = self.obj.ReportedTimes
+        # Transfer the values from the solver_object object to instance variables
+        self.t_initial = solver_object.StartTime
+        self.t_final = solver_object.EndTime
+        self.reporting_time_step = solver_object.ReportingTimeStep
+        self.plane_norm = solver_object.UnitVector
+        self.reportedTimes = solver_object.ReportedTimes
 
         # Set play back period to mid-range
         self.play_back_period = 100  # msec
@@ -99,8 +98,8 @@ class TaskPanelDapAnimate:
         self.timer = PySide.QtCore.QTimer()
         self.timer.setInterval(self.play_back_period)
         self.timer.timeout.connect(
-            self.onTimerTimeout
-        )  # callback function after each tick
+            self.onTimerTimeout  # callback function after each tick
+        )
 
         self.list_of_moving_bodies = DapTools.getListOfMovingBodies(
             self.list_of_bodies, self.solver_document
@@ -126,7 +125,9 @@ class TaskPanelDapAnimate:
 
     #  -------------------------------------------------------------------------
     def thisTick_Pose(self, clock_tick):
-        """Generate the list of poses for all the bodies at this clock_tick"""
+        """Generate the list of poses for all the bodies at this clock_tick
+        A pose is in polar coordinates, and consists of a radius (r) and
+        angle (p)"""
 
         PoseAtThisTick = []
         for body_number in range(len(self.Bodies_p[clock_tick])):
@@ -137,8 +138,9 @@ class TaskPanelDapAnimate:
 
     #  -------------------------------------------------------------------------
     def reject(self):
-        """Closes document and sets the active document
-        back to the solver document when the 'close' button is pressed"""
+        """This is called when the 'close' button is pressed
+        Closes document and sets the active document
+        back to the solver document""" 
 
         if Debug:
             FreeCAD.Console.PrintMessage("Animate 'close' button pressed\n")
@@ -155,13 +157,13 @@ class TaskPanelDapAnimate:
 
     #  -------------------------------------------------------------------------
     def playStart(self):
-        """Start the Qt timer"""
+        """Start the Qt timer when the play button is pressed"""
 
         self.timer.start()
 
     #  -------------------------------------------------------------------------
     def stopStop(self):
-        """Stop the Qt timer"""
+        """Stop the Qt timer when the stop button is pressed"""
 
         self.timer.stop()
 
@@ -214,7 +216,8 @@ class TaskPanelDapAnimate:
         self.current_pose = self.thisTick_Pose(clock_tick)
 
         # Update the time label in the dialog
-        # We add one step to the reported value so that the reported time, ends at exactly t_final
+        # We add one step to the reported value so that the reported time,
+        # ends at exactly t_final
         self.form.timeStepLabel.setText(
             "{0:5.3f}s of {1:5.3f}s".format(
                 self.reportedTimes[clock_tick] + self.reporting_time_step, self.t_final
