@@ -1,0 +1,43 @@
+FreeCAD
+FreeCAD.ActiveDocument
+FreeCAD.ActiveDocument.ActiveObject.Name)
+FreeCAD.ActiveDocument.Objects
+FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
+FreeCAD.ActiveDocument.openTransaction("Create Dap Container")
+FreeCAD.Console.PrintError("Selected object does not have a shape \n")
+FreeCAD.Console.PrintMessage("Activated Animation\n")
+FreeCAD.GuiUp:
+FreeCAD.Matrix()
+FreeCAD.Rotation(0, 0, 0, 1)
+FreeCAD.Vector(0, 0, 0)
+FreeCAD.closeDocument(self.animation_document.Name)
+FreeCAD.getDocument(docName)
+FreeCAD.getDocument(doc_name).recompute()
+FreeCAD.getDocument(self.doc_name)
+FreeCAD.listDocuments():
+FreeCAD.newDocument(docName)
+FreeCAD.setActiveDocument(docName)
+FreeCADGui
+FreeCADGui.ActiveDocument.setEdit(
+FreeCADGui.Control.closeDialog()
+FreeCADGui.Control.showDialog(
+FreeCADGui.Control.showDialog(taskd)
+FreeCADGui.PySideUic.loadUi(ui_path)
+FreeCADGui.Selection.addSelection(selection_object)
+FreeCADGui.Selection.clearSelection()
+FreeCADGui.Selection.getSelection()
+FreeCADGui.Selection.getSelectionEx()
+FreeCADGui.Selection.removeObserver(self)
+FreeCADGui.SendMsgToActiveView("ViewFit")
+FreeCADGui.UiLoader()
+FreeCADGui.activateWorkbench("DapWorkbench")
+FreeCADGui.activeWorkbench().name() != 'DapWorkbench':
+FreeCADGui.addCommand("Dap_Animation", _CommandDapAnimation())
+FreeCADGui.addModule("DapContainer")
+FreeCADGui.doCommand("")
+FreeCADGui.getDocument(self.obj.Document)
+FreeCADGui.getDocument(vobj.Object.Document)
+FreeCADGui.showObject(selection_object)
+FreeCADGui.showObject(self.body_objects[index])
+FreeCADMaterials()
+FreeCADMaterials(self):
