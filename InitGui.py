@@ -89,7 +89,7 @@ class DapWorkbench(Workbench):
         FreeCADGui.addCommand("Dap_Point", _CommandDapPoint())
 
         # Create a toolbar with the DAP commands (icons)
-        self.appendToolbar("DAP Commands", self.MakeCommandList())
+        self.appendToolbar("Nikra-DAP Commands", self.MakeCommandList())
 
         # Create a drop-down menu item for the menu bar
         self.appendMenu("Nikra-Dap", self.MakeCommandList())
@@ -134,7 +134,7 @@ class DapWorkbench(Workbench):
         'recipient' will be 'tree' when mouse is in the TREE window """
 
         # Append the DAP commands to the existing context menu
-        self.appendContextMenu("DAP Commands", self.MakeCommandList())
+        self.appendContextMenu("Nikra-DAP Commands", self.MakeCommandList())
 
     #  -------------------------------------------------------------------------
     def GetClassName(self):
