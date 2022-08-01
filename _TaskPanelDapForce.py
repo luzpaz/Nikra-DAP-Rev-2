@@ -1,5 +1,40 @@
-# *        -  Varnu Govender (UP) <govender.v@tuks.co.za>                            *
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Varnu Govender (UP) <govender.v@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
+
 from webbrowser import get
 import FreeCAD
 
@@ -10,6 +45,7 @@ import DapTools
 import DapForceSelection
 import _DapBodySelector
 import _DapForceDriver
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -18,7 +54,7 @@ if FreeCAD.GuiUp:
 
 # =============================================================================
 class TaskPanelDapForce:
-    """ Taskpanel for adding DAP Force """
+    """Taskpanel for adding DAP Force"""
 
     #  -------------------------------------------------------------------------
     def __init__(self, obj):
@@ -49,8 +85,12 @@ class TaskPanelDapForce:
         self.default_angle = "0 rad"
         ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelDapForces.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
-        self.bodySelector = _DapBodySelector.DapBodySelector(self.form.bodySelection, self.obj)
-        self.driveSelector = _DapForceDriver.DapForceDriver(self.form.dapForceDriver, self.obj)
+        self.bodySelector = _DapBodySelector.DapBodySelector(
+            self.form.bodySelection, self.obj
+        )
+        self.driveSelector = _DapForceDriver.DapForceDriver(
+            self.form.dapForceDriver, self.obj
+        )
         self.form.dapForceDriver.setVisible(False)
         self.form.forceComboBox.addItems(DapForceSelection.FORCE_TYPES)
         #  On reload, check to see if item already exists, and set dropbox item appropriately
@@ -101,7 +141,9 @@ class TaskPanelDapForce:
         """ """
         if self.Type == "Spring" or self.Type == "Linear Spring Damper":
             self.bodySelector.Page1()
-        elif self.Type == "Rotational Spring" or self.Type == "Rotational Spring Damper":
+        elif (
+            self.Type == "Rotational Spring" or self.Type == "Rotational Spring Damper"
+        ):
             self.bodySelector.Page2()
         else:
             self.bodySelector.close()
@@ -160,12 +202,14 @@ class TaskPanelDapForce:
         """If this is missing, there won't be an OK button"""
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
-        if self.Type == 'Gravity' and DapTools.gravityChecker():
-            FreeCAD.Console.PrintError('Gravity has already been selected')
+        if self.Type == "Gravity" and DapTools.gravityChecker():
+            FreeCAD.Console.PrintError("Gravity has already been selected")
         if self.Type == "Spring" or self.Type == "Linear Spring Damper":
             self.bodySelector.accept(0)
             # self.bodySelector.execute(self.obj, 0)
-        elif self.Type == "Rotational Spring" or self.Type == "Rotational Spring Damper":
+        elif (
+            self.Type == "Rotational Spring" or self.Type == "Rotational Spring Damper"
+        ):
             self.bodySelector.accept(1)
             # self.bodySelector.execute(self.obj,1)
         self.obj.ForceTypes = self.Type
@@ -199,10 +243,16 @@ class TaskPanelDapForce:
         """IF this is missing, there won't be a Cancel button"""
         FreeCADGui.Selection.removeObserver(self)
         # #Do the reject checker before resetting the force type to previous selection
-        if self.obj.ForceTypes == "Spring" or self.obj.ForceTypes == "Linear Spring Damper":
+        if (
+            self.obj.ForceTypes == "Spring"
+            or self.obj.ForceTypes == "Linear Spring Damper"
+        ):
             self.bodySelector.reject(0)
             # #self.bodySelector.execute(self.obj, 0)
-        elif self.obj.ForceTypes == "Rotational Spring" or self.obj.ForceTypes == "Rotational Spring Damper":
+        elif (
+            self.obj.ForceTypes == "Rotational Spring"
+            or self.obj.ForceTypes == "Rotational Spring Damper"
+        ):
             self.bodySelector.reject(1)
         self.obj.ForceTypes = self.TypeReset
         #  Recompute document to update viewprovider based on the shapes
@@ -218,7 +268,9 @@ class TaskPanelDapForce:
     def comboTypeChanged(self):
         """ """
         type_index = self.form.forceComboBox.currentIndex()
-        self.form.descriptionhelp.setText(DapForceSelection.FORCE_TYPE_HELPER_TEXT[type_index])
+        self.form.descriptionhelp.setText(
+            DapForceSelection.FORCE_TYPE_HELPER_TEXT[type_index]
+        )
         self.Type = DapForceSelection.FORCE_TYPES[type_index]
         # TODO reset type on reject
         self.obj.ForceTypes = self.Type
@@ -232,10 +284,12 @@ class TaskPanelDapForce:
         if self.Type == "Spring" or self.Type == "Linear Spring Damper":
             self.form.bodySelection.setVisible(True)
             self.bodySelector.Page1()
-        elif self.Type == "Rotational Spring" or self.Type == "Rotational Spring Damper":
+        elif (
+            self.Type == "Rotational Spring" or self.Type == "Rotational Spring Damper"
+        ):
             self.form.bodySelection.setVisible(True)
             self.bodySelector.Page2()
         # elif self.Type == "Gravity":
-            # self.bodySelector.close()
+        # self.bodySelector.close()
         else:
             self.form.bodySelection.setVisible(False)

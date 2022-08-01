@@ -1,11 +1,45 @@
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
-# *        -  Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                       *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
 
 import FreeCAD
 import os
 import os.path
 import DapTools
 import DapJointSelection
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -17,7 +51,7 @@ Debug = True
 
 # =============================================================================
 class TaskPanelDapJoint:
-    """ Taskpanel for adding DAP Joints """
+    """Taskpanel for adding DAP Joints"""
 
     #  -------------------------------------------------------------------------
     def __init__(self, obj):
@@ -37,11 +71,15 @@ class TaskPanelDapJoint:
         ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelDapJoints.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
         self.form.TypeOfRelMov.addItems(DapJointSelection.JOINT_TYPES)
-        ji = DapTools.indexOrDefault(DapJointSelection.JOINT_TYPES, self.obj.TypeOfRelMov, 0)
+        ji = DapTools.indexOrDefault(
+            DapJointSelection.JOINT_TYPES, self.obj.TypeOfRelMov, 0
+        )
         self.form.TypeOfRelMov.currentIndexChanged.connect(self.jointTypeChanged)
         self.form.TypeOfRelMov.setCurrentIndex(ji)
         self.jointTypeChanged()
-        dmi = DapTools.indexOrDefault(DapJointSelection.DEFINITION_MODES[ji], self.obj.RelMovDefinitionMode, 0)
+        dmi = DapTools.indexOrDefault(
+            DapJointSelection.DEFINITION_MODES[ji], self.obj.RelMovDefinitionMode, 0
+        )
         self.form.definitionMode.currentIndexChanged.connect(self.definitionModeChanged)
         self.form.definitionMode.setCurrentIndex(dmi)
         self.definitionModeChanged()
@@ -77,11 +115,15 @@ class TaskPanelDapJoint:
         self.form.PushButtonLCS1LinMov.clicked.connect(self.addLCS1)
         self.form.PushButtonLCS2LinMov.clicked.connect(self.addLCS2)
         self.form.DriverOn.addItems(DapJointSelection.YES_NO)
-        self.DriverOnIndex = DapTools.indexOrDefault(DapJointSelection.YES_NO, self.obj.DriverOn, 0)
+        self.DriverOnIndex = DapTools.indexOrDefault(
+            DapJointSelection.YES_NO, self.obj.DriverOn, 0
+        )
         self.form.DriverOn.currentIndexChanged.connect(self.DriverOnChanged)
         self.form.DriverOn.setCurrentIndex(self.DriverOnIndex)
         # self.DriverOnChanged()
-        self.DriverFuncIndex = DapTools.indexOrDefault(DapJointSelection.FUNCTION_TYPES, self.obj.DriverFunctionType, 0)
+        self.DriverFuncIndex = DapTools.indexOrDefault(
+            DapJointSelection.FUNCTION_TYPES, self.obj.DriverFunctionType, 0
+        )
         self.form.radioButtonFuncTypeA.toggled.connect(self.DriverFuncChanged)
         if self.DriverFuncIndex == 1:
             self.form.radioButtonFuncTypeA.setChecked(True)
@@ -124,8 +166,12 @@ class TaskPanelDapJoint:
         # self.obj.Body1 = self.Body1
         # self.obj.Body2 = self.Body2
         if self.obj.Body1 == self.obj.Body2:
-            FreeCAD.Console.PrintError("\nERROR: A relative movement has been defined between a body and itself.")
-            FreeCAD.Console.PrintError("  Please update the incorrect relative movement so that it is defined between 2 different bodies.")
+            FreeCAD.Console.PrintError(
+                "\nERROR: A relative movement has been defined between a body and itself."
+            )
+            FreeCAD.Console.PrintError(
+                "  Please update the incorrect relative movement so that it is defined between 2 different bodies."
+            )
         # self.obj.Point1RelMov = self.Point1RelMov
         # self.obj.Point2RelMov = self.Point2RelMov
         self.obj.DriverFunctionType = self.DriverFunctionType
@@ -135,12 +181,18 @@ class TaskPanelDapJoint:
         self.obj.coefC3DriverFuncTypeA = DapTools.getQuantity(self.form.FuncACoefC3)
         self.obj.tStartDriverFuncTypeB = DapTools.getQuantity(self.form.tStartFuncB)
         self.obj.tEndDriverFuncTypeB = DapTools.getQuantity(self.form.tEndFuncB)
-        self.obj.initialValueDriverFuncTypeB = DapTools.getQuantity(self.form.startValueFuncB)
+        self.obj.initialValueDriverFuncTypeB = DapTools.getQuantity(
+            self.form.startValueFuncB
+        )
         self.obj.endValueDriverFuncTypeB = DapTools.getQuantity(self.form.endValueFuncB)
         self.obj.tStartDriverFuncTypeC = DapTools.getQuantity(self.form.tStartFuncC)
         self.obj.tEndDriverFuncTypeC = DapTools.getQuantity(self.form.tEndFuncC)
-        self.obj.initialValueDriverFuncTypeC = DapTools.getQuantity(self.form.startValueFuncC)
-        self.obj.endDerivativeDriverFuncTypeC = DapTools.getQuantity(self.form.endDerivativeFuncC)
+        self.obj.initialValueDriverFuncTypeC = DapTools.getQuantity(
+            self.form.startValueFuncC
+        )
+        self.obj.endDerivativeDriverFuncTypeC = DapTools.getQuantity(
+            self.form.endDerivativeFuncC
+        )
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
         return
@@ -165,9 +217,13 @@ class TaskPanelDapJoint:
         return True
         FreeCAD.Console.PrintMessage("\n")
         FreeCAD.Console.PrintMessage("\n")
-        FreeCAD.Console.PrintMessage("reject self.DriverFunctionType = {self.DriverFunctionType}")
+        FreeCAD.Console.PrintMessage(
+            "reject self.DriverFunctionType = {self.DriverFunctionType}"
+        )
         FreeCAD.Console.PrintMessage("\n")
-        FreeCAD.Console.PrintMessage("reject self.obj.DriverFunctionType = {self.obj.DriverFunctionType}")
+        FreeCAD.Console.PrintMessage(
+            "reject self.obj.DriverFunctionType = {self.obj.DriverFunctionType}"
+        )
 
     #  -------------------------------------------------------------------------
     def jointTypeChanged(self):
@@ -183,9 +239,15 @@ class TaskPanelDapJoint:
         """ """
         self.joint_type_index = self.form.TypeOfRelMov.currentIndex()
         definition_mode_index = self.form.definitionMode.currentIndex()
-        self.RelMovDefinitionMode = DapJointSelection.DEFINITION_MODES[self.joint_type_index][definition_mode_index]
-        self.form.helperText.setText(DapJointSelection.HELPER_TEXT[self.joint_type_index][definition_mode_index])
-        current_index = self.findDefinitionWidgetIndex(self.joint_type_index, definition_mode_index)
+        self.RelMovDefinitionMode = DapJointSelection.DEFINITION_MODES[
+            self.joint_type_index
+        ][definition_mode_index]
+        self.form.helperText.setText(
+            DapJointSelection.HELPER_TEXT[self.joint_type_index][definition_mode_index]
+        )
+        current_index = self.findDefinitionWidgetIndex(
+            self.joint_type_index, definition_mode_index
+        )
         self.form.definitionWidget.setCurrentIndex(current_index)
         if definition_mode_index == 0:
             if self.joint_type_index == 0 and self.obj.Point1RelMov != "":
@@ -242,7 +304,9 @@ class TaskPanelDapJoint:
         sel = FreeCADGui.Selection.getSelectionEx()
         updated = False
         if len(sel) > 1 or len(sel[0].SubElementNames) > 1:
-            FreeCAD.Console.PrintError("Only a single face, or single LCS should be selected when defining coordinate.")
+            FreeCAD.Console.PrintError(
+                "Only a single face, or single LCS should be selected when defining coordinate."
+            )
         else:
             if "LCS" in sel[0].Object.Name:
                 if self.joint_type_index == 0:
@@ -263,7 +327,9 @@ class TaskPanelDapJoint:
         """ """
         sel = FreeCADGui.Selection.getSelectionEx()
         if len(sel) > 1 or len(sel[0].SubElementNames) > 1:
-            FreeCAD.Console.PrintError("Only a single face, or single LCS should be selected.")
+            FreeCAD.Console.PrintError(
+                "Only a single face, or single LCS should be selected."
+            )
         else:
             if "LCS" in sel[0].Object.Name:
                 if self.joint_type_index == 1:
@@ -290,15 +356,21 @@ class TaskPanelDapJoint:
         """ """
         if self.form.radioButtonFuncTypeA.isChecked():
             self.DriverFuncIndex = 1
-            self.DriverFunctionType = DapJointSelection.FUNCTION_TYPES[self.DriverFuncIndex]
+            self.DriverFunctionType = DapJointSelection.FUNCTION_TYPES[
+                self.DriverFuncIndex
+            ]
         elif self.form.radioButtonFuncTypeB.isChecked():
             self.DriverFuncIndex = 2
-            self.DriverFunctionType = DapJointSelection.FUNCTION_TYPES[self.DriverFuncIndex]
+            self.DriverFunctionType = DapJointSelection.FUNCTION_TYPES[
+                self.DriverFuncIndex
+            ]
         elif self.form.radioButtonFuncTypeC.isChecked():
             self.DriverFuncIndex = 3
-            self.DriverFunctionType = DapJointSelection.FUNCTION_TYPES[self.DriverFuncIndex]
+            self.DriverFunctionType = DapJointSelection.FUNCTION_TYPES[
+                self.DriverFuncIndex
+            ]
         # else:
-            # self.DriverFuncIndex = 0
+        # self.DriverFuncIndex = 0
         self.form.stackedWidgetFuncTypeInputs.setCurrentIndex(self.DriverFuncIndex - 1)
 
     #  -------------------------------------------------------------------------
@@ -310,9 +382,15 @@ class TaskPanelDapJoint:
         DapTools.setQuantity(self.form.FuncACoefC3, self.obj.coefC3DriverFuncTypeA)
         DapTools.setQuantity(self.form.tStartFuncB, self.obj.tStartDriverFuncTypeB)
         DapTools.setQuantity(self.form.tEndFuncB, self.obj.tEndDriverFuncTypeB)
-        DapTools.setQuantity(self.form.startValueFuncB, self.obj.initialValueDriverFuncTypeB)
+        DapTools.setQuantity(
+            self.form.startValueFuncB, self.obj.initialValueDriverFuncTypeB
+        )
         DapTools.setQuantity(self.form.endValueFuncB, self.obj.endValueDriverFuncTypeB)
         DapTools.setQuantity(self.form.tStartFuncC, self.obj.tStartDriverFuncTypeC)
         DapTools.setQuantity(self.form.tEndFuncC, self.obj.tEndDriverFuncTypeC)
-        DapTools.setQuantity(self.form.startValueFuncC, self.obj.initialValueDriverFuncTypeC)
-        DapTools.setQuantity(self.form.endDerivativeFuncC, self.obj.endDerivativeDriverFuncTypeC)
+        DapTools.setQuantity(
+            self.form.startValueFuncC, self.obj.initialValueDriverFuncTypeC
+        )
+        DapTools.setQuantity(
+            self.form.endDerivativeFuncC, self.obj.endDerivativeDriverFuncTypeC
+        )

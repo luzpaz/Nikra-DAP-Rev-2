@@ -1,5 +1,40 @@
-# *        -  Varnu Govender (UP) <govender.v@tuks.co.za>                            *
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Varnu Govender (UP) <govender.v@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
+
 import FreeCAD
 import os
 import os.path
@@ -7,6 +42,7 @@ import DapTools
 from DapTools import addObjectProperty
 import DapForceSelection
 import _TaskPanelDapForce
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -21,10 +57,16 @@ from math import degrees, acos
 global Debug
 Debug = True
 
-TYPES = ["two points and two bodies", "One point and two bodies", "Point, Vertex or LCS"]
-HELPER_TEXT = ["Choose two points (LCS) and two bodies, where the points belong to the corresponding body",
-               "Choose one point (LCS) and two bodies",
-               "Add points for post-processing."]
+TYPES = [
+    "two points and two bodies",
+    "One point and two bodies",
+    "Point, Vertex or LCS",
+]
+HELPER_TEXT = [
+    "Choose two points (LCS) and two bodies, where the points belong to the corresponding body",
+    "Choose one point (LCS) and two bodies",
+    "Add points for post-processing.",
+]
 
 
 # =============================================================================
@@ -36,7 +78,9 @@ class DapBodySelector:
         self.parent_widget = parent_widget
         self.form = FreeCADGui.PySideUic.loadUi(ui_path, self.parent_widget)
         self.parent_widget.layout().addWidget(self.form)
-        addObjectProperty(obj, "JointType", TYPES, "App::PropertyEnumeration", "", "Joint Types")
+        addObjectProperty(
+            obj, "JointType", TYPES, "App::PropertyEnumeration", "", "Joint Types"
+        )
 
         self.obj = obj
         self.obj.setEditorMode("JointType", 2)
@@ -55,16 +99,25 @@ class DapBodySelector:
     def close(self):
         """closes the widget"""
         self.form.inputWidget.setCurrentIndex(-1)
+
     #  index == 0
 
     #  -------------------------------------------------------------------------
     def Page1(self):
-        """2 Points 2 Bodies """
+        """2 Points 2 Bodies"""
         index = 0
-        self.form.page1.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Preferred)
-        self.form.page2.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
-        self.form.page3.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
-        self.form.page4.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
+        self.form.page1.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Preferred
+        )
+        self.form.page2.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
+        self.form.page3.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
+        self.form.page4.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
 
         self.form.inputWidget.setCurrentIndex(index)
         self.PageInit(index)
@@ -83,23 +136,35 @@ class DapBodySelector:
         self.form.lcsName1.clicked.connect(lambda: self.selectLCSinGui(self.obj.Joint1))
         self.form.lcsName2.clicked.connect(lambda: self.selectLCSinGui(self.obj.Joint2))
 
-        self.form.body1Combo.currentIndexChanged.connect(lambda: self.selectedBody1(_index=index))
-        self.form.body2Combo.currentIndexChanged.connect(lambda: self.selectedBody2(_index=index))
+        self.form.body1Combo.currentIndexChanged.connect(
+            lambda: self.selectedBody1(_index=index)
+        )
+        self.form.body2Combo.currentIndexChanged.connect(
+            lambda: self.selectedBody2(_index=index)
+        )
         self.rebuildInputs(index)
 
         self.comboTypeChanged()
         return
 
-# index == 1
+    # index == 1
 
     #  -------------------------------------------------------------------------
     def Page2(self):
-        """1 point 2 bodies """
+        """1 point 2 bodies"""
         index = 1
-        self.form.page1.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
-        self.form.page2.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Preferred)
-        self.form.page3.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
-        self.form.page4.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
+        self.form.page1.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
+        self.form.page2.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Preferred
+        )
+        self.form.page3.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
+        self.form.page4.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
 
         self.form.inputWidget.setCurrentIndex(index)
         self.PageInit(index)
@@ -118,21 +183,34 @@ class DapBodySelector:
         self.form.lcsPush3.clicked.connect(lambda: self.addLCS1(index))
         self.form.lcsName3.clicked.connect(lambda: self.selectLCSinGui(self.obj.Joint1))
         # NOTE to Varnu, when indexChanged even is called, an index is passed through to the function
-        self.form.body1Combo_2.currentIndexChanged.connect(lambda: self.selectedBody1(_index=index))
-        self.form.body2Combo_2.currentIndexChanged.connect(lambda: self.selectedBody2(_index=index))
+        self.form.body1Combo_2.currentIndexChanged.connect(
+            lambda: self.selectedBody1(_index=index)
+        )
+        self.form.body2Combo_2.currentIndexChanged.connect(
+            lambda: self.selectedBody2(_index=index)
+        )
         self.rebuildInputs(index)
         self.comboTypeChanged()
         return
+
     #  index == 2
 
     #  -------------------------------------------------------------------------
     def Page3(self):
-        """Points selection """
+        """Points selection"""
         index = 2
-        self.form.page1.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
-        self.form.page2.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
-        self.form.page3.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Preferred)
-        self.form.page4.setSizePolicy(PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored)
+        self.form.page1.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
+        self.form.page2.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
+        self.form.page3.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Preferred
+        )
+        self.form.page4.setSizePolicy(
+            PySide.QtGui.QSizePolicy.Expanding, PySide.QtGui.QSizePolicy.Ignored
+        )
 
         self.form.inputWidget.setCurrentIndex(index)
         self.PageInit(index)
@@ -147,13 +225,13 @@ class DapBodySelector:
 
     #  -------------------------------------------------------------------------
     def emptyPage(self):
-        """ Empty page if nothing should be selected"""
+        """Empty page if nothing should be selected"""
         index = 3
         self.form.inputWidget.setCurrentIndex(index)
 
     #  -------------------------------------------------------------------------
     def PageInit(self, index):
-        """assign local variables depending on the page selected """
+        """assign local variables depending on the page selected"""
         #  self.index = self.form.inputWidget.currentIndex()
         if index == 0:
             #  self.JType = self.obj.JointType
@@ -354,11 +432,16 @@ class DapBodySelector:
     #  -------------------------------------------------------------------------
     def selectInGui2(self):
         """shows the points chosen from a combo box"""
-        if "LCS" in self.form.pointList.currentItem().text() or "Point" in self.form.pointList.currentItem().text():
+        if (
+            "LCS" in self.form.pointList.currentItem().text()
+            or "Point" in self.form.pointList.currentItem().text()
+        ):
             FreeCADGui.Selection.clearSelection()
             docName = str(self.doc_name)
             doc = FreeCAD.getDocument(docName)
-            selection_object = doc.getObjectsByLabel(self.form.pointList.currentItem().text())[0]
+            selection_object = doc.getObjectsByLabel(
+                self.form.pointList.currentItem().text()
+            )[0]
             FreeCADGui.showObject(selection_object)
             FreeCADGui.Selection.addSelection(selection_object)
         elif "Vertex" in self.form.pointList.currentItem().text():
@@ -408,7 +491,9 @@ class DapBodySelector:
         sel = FreeCADGui.Selection.getSelectionEx()
         updated = False
         if len(sel) > 1 or len(sel[0].SubElementNames) > 1:
-            FreeCAD.Console.PrintError("Only a single face, or single LCS should be selected when defining coordinate.")
+            FreeCAD.Console.PrintError(
+                "Only a single face, or single LCS should be selected when defining coordinate."
+            )
         else:
             if "LCS" in sel[0].Object.Name:
                 if index == 0:
@@ -435,7 +520,9 @@ class DapBodySelector:
     def addLCS2(self):
         sel = FreeCADGui.Selection.getSelectionEx()
         if len(sel) > 1 or len(sel[0].SubElementNames) > 1:
-            FreeCAD.Console.PrintError("Only a single face, or single LCS should be selected.")
+            FreeCAD.Console.PrintError(
+                "Only a single face, or single LCS should be selected."
+            )
         else:
             if "LCS" in sel[0].Object.Name:
                 self.form.lcsName2.setText(sel[0].Object.Label)
@@ -454,7 +541,9 @@ class DapBodySelector:
         sel = FreeCADGui.Selection.getSelectionEx()
 
         if len(sel) > 1 or len(sel[0].SubElementNames) > 1:
-            FreeCAD.Console.PrintError("Only a single point,LCS or Vertex needs to be selected")
+            FreeCAD.Console.PrintError(
+                "Only a single point,LCS or Vertex needs to be selected"
+            )
         else:
             if "LCS" in sel[0].Object.Name:
                 self.form.pointName.setText(sel[0].Object.Label)
@@ -513,6 +602,6 @@ class DapBodySelector:
 
     #  -------------------------------------------------------------------------
     def closing(self):
-        """ Call this on close to let the widget to its proper cleanup """
+        """Call this on close to let the widget to its proper cleanup"""
         self.form.inputWidget.setCurrentIndex(-1)
         FreeCADGui.Selection.removeObserver(self)

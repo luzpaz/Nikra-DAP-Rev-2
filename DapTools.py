@@ -1,6 +1,40 @@
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
-# *        -  Dewald Hattingh (UP) <u17082006@tuks.co.za>                            *
-# *        -  Varnu Govender (UP) <govender.v@tuks.co.za>                            *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Dewald Hattingh (UP) <u17082006@tuks.co.za>                             *
+# *          Varnu Govender (UP) <govender.v@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
 
 # *        -  Code snippets adapted from CfdOF Workbench                             *
 # NOTE Some of these functions come from CfdOF, need to give credit
@@ -16,8 +50,9 @@ Debug = True
 #  -------------------------------------------------------------------------
 def setActiveContainer(container):
     from DapContainer import _DapContainer
+
     for obj in FreeCAD.ActiveDocument.Objects:
-        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _DapContainer):
+        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _DapContainer):
             obj.IsActiveContainer = False
     container.IsActiveContainer = True
 
@@ -25,22 +60,25 @@ def setActiveContainer(container):
 #  -------------------------------------------------------------------------
 def getActiveContainer():
     from DapContainer import _DapContainer
+
     for obj in FreeCAD.ActiveDocument.Objects:
-        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _DapContainer):
+        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _DapContainer):
             if obj.IsActiveContainer:
                 return obj
     return None
 
 
 #  -------------------------------------------------------------------------
-def getListOfSolidsFromShape(obj, shape_label_list=[], parent_object=None, parent_assembly={}):
-    """ Recursively loops through assemblies or shape objects to find all the sub shapes
+def getListOfSolidsFromShape(
+    obj, shape_label_list=[], parent_object=None, parent_assembly={}
+):
+    """Recursively loops through assemblies or shape objects to find all the sub shapes
     input:
         obj: object, such as assembly container, part, body
     returns:
-        shape_label_list: list of the labels of objects contained within obj """
+        shape_label_list: list of the labels of objects contained within obj"""
 
-    if hasattr(obj, 'Shape'):
+    if hasattr(obj, "Shape"):
         solids = obj.Shape.Solids
         if len(solids) == 1:
             shape_label_list.append(obj.Label)
@@ -55,8 +93,10 @@ def getListOfSolidsFromShape(obj, shape_label_list=[], parent_object=None, paren
                     # This applies to assemlby 4 assemblies
                     # TODO add in a formal checker for assemblies
                     for sub_object in obj.Group:
-                        getListOfSolidsFromShape(sub_object, shape_label_list, obj, parent_assembly)
-            elif obj.Shape.ShapeType == 'Compound':
+                        getListOfSolidsFromShape(
+                            sub_object, shape_label_list, obj, parent_assembly
+                        )
+            elif obj.Shape.ShapeType == "Compound":
                 shape_label_list.append(obj.Label)
                 if parent_object == None:
                     parent_assembly[obj.Label] = None
@@ -68,10 +108,10 @@ def getListOfSolidsFromShape(obj, shape_label_list=[], parent_object=None, paren
 
 #  -------------------------------------------------------------------------
 def getSolidsFromAllShapes(doc):
-    """ Function loops through all defined bodies, and return the list
+    """Function loops through all defined bodies, and return the list
     of shapes making up each body, as well as return the parent assembly
     for each sub part. If the subpart does not have a parent assembly then
-    it is defined as None. """
+    it is defined as None."""
 
     body_labels = getListOfBodyLabels()
     parts_shape_list_all = {}
@@ -99,7 +139,7 @@ def getAssemblyObjectByLabel(doc, parent_assembly_label, part_label):
 
 #  -------------------------------------------------------------------------
 def addObjectProperty(obj, prop, init_val, type, *args):
-    """ Call addProperty on the object if it does not yet exist """
+    """Call addProperty on the object if it does not yet exist"""
 
     added = False
     if prop not in obj.PropertiesList:
@@ -206,10 +246,10 @@ def getListOfJointObjects():
 
 #  -------------------------------------------------------------------------
 def get_module_path():
-    """ Returns the current Dap module path.
+    """Returns the current Dap module path.
     Determines where this file is running from, so works regardless of whether
     the module is installed in the app's module directory or the user's app data folder.
-    (The second overrides the first.) """
+    (The second overrides the first.)"""
     return os.path.dirname(__file__)
 
 
@@ -229,7 +269,7 @@ def gravityChecker():
 
 #  -------------------------------------------------------------------------
 def indexOrDefault(list, findItem, defaultIndex):
-    """ Look for findItem in list, and return defaultIndex if not found """
+    """Look for findItem in list, and return defaultIndex if not found"""
     try:
         return list.index(findItem)
     except ValueError:
@@ -238,7 +278,7 @@ def indexOrDefault(list, findItem, defaultIndex):
 
 #  -------------------------------------------------------------------------
 def setQuantity(inputField, quantity):
-    """ Set the quantity (quantity object or unlocalised string) into the inputField correctly """
+    """Set the quantity (quantity object or unlocalised string) into the inputField correctly"""
 
     #  Must set in the correctly localised value as the user would enter it.
     #  A bit painful because the python locale settings seem to be based on language,
@@ -250,15 +290,19 @@ def setQuantity(inputField, quantity):
     # q = FreeCAD.Units.Quantity(unit_quantity[0] + unit_quantity[2])
     #  Avoid any truncation
     if isinstance(q.Format, tuple):  # Backward compat
-        q.Format = (12, 'e')
+        q.Format = (12, "e")
     else:
-        q.Format = {'Precision': 12, 'NumberFormat': 'e', 'Denominator': q.Format['Denominator']}
+        q.Format = {
+            "Precision": 12,
+            "NumberFormat": "e",
+            "Denominator": q.Format["Denominator"],
+        }
     inputField.setProperty("quantityString", q.UserString)
 
 
 #  -------------------------------------------------------------------------
 def getQuantity(inputField):
-    """ Get the quantity as an unlocalised string from an inputField """
+    """Get the quantity as an unlocalised string from an inputField"""
 
     q = inputField.property("quantity")
     return str(q)
@@ -266,11 +310,15 @@ def getQuantity(inputField):
 
 #  -------------------------------------------------------------------------
 def projectPointOntoPlane(plane_norm, point, plane_origin=FreeCAD.Vector(0, 0, 0)):
-    """ Projects a given vector onto the plane defined by the norm of the plane, passing through the (0, 0, 0) """
+    """Projects a given vector onto the plane defined by the norm of the plane, passing through the (0, 0, 0)"""
 
-    projected_point = point - (plane_norm * (point - plane_origin)) * plane_norm  # ??????????????????????????????
+    projected_point = (
+        point - (plane_norm * (point - plane_origin)) * plane_norm
+    )  # ??????????????????????????????
 
     if Debug:
-        FreeCAD.Console.PrintMessage("Projected point " + str(point) + ": " + str(projected_point) + "\n")
+        FreeCAD.Console.PrintMessage(
+            "Projected point " + str(point) + ": " + str(projected_point) + "\n"
+        )
 
     return projected_point

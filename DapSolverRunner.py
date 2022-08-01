@@ -1,11 +1,47 @@
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
-# *        -  Dewald Hattingh (UP) <u17082006@tuks.co.za>                            *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Dewald Hattingh (UP) <u17082006@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
+
 import FreeCAD
 import os
 import DapTools
 from DapTools import addObjectProperty
 from pivy import coin
 import Part
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -14,21 +50,22 @@ if FreeCAD.GuiUp:
 global Debug
 Debug = True
 
-MOTION_PLANES = ["X-Y Plane",
-                 "Y-Z Plane",
-                 "X-Z Plane",
-                 "Custom Plane..."]
-MOTION_PLANES_HELPER_TEXT = ["Planar Motion is in XY Plane",
-                             "Planar Motion is in YZ Plane",
-                             "Planar Motion is in XZ Plane",
-                             "User-defined Plane"]
-SELECTION_TYPE = ["Normal Vector Definition",
-                  "Object Selection",
-                  ]
-SELECTION_TYPE_HELPER_TEXT = ["Define the normal vector of the plane of motion",
-                              "Experimental: select object entities to define plane of motion. \
-                              Valid selections include a plane, a face or a sketch."
-                              ]
+MOTION_PLANES = ["X-Y Plane", "Y-Z Plane", "X-Z Plane", "Custom Plane..."]
+MOTION_PLANES_HELPER_TEXT = [
+    "Planar Motion is in XY Plane",
+    "Planar Motion is in YZ Plane",
+    "Planar Motion is in XZ Plane",
+    "User-defined Plane",
+]
+SELECTION_TYPE = [
+    "Normal Vector Definition",
+    "Object Selection",
+]
+SELECTION_TYPE_HELPER_TEXT = [
+    "Define the normal vector of the plane of motion",
+    "Experimental: select object entities to define plane of motion. \
+                              Valid selections include a plane, a face or a sketch.",
+]
 
 
 #  -------------------------------------------------------------------------
@@ -45,29 +82,35 @@ class _CommandDapSolver:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """ Set up the menu text, the icon, and the tooltip """
+        """Called by FreeCAD when addCommand is run in InitGui.py
+        Returns a dictionary defining the icon, the menu text and the tooltip"""
 
-        return {'Pixmap': os.path.join(DapTools.get_module_path(),
-                                       "icons",
-                                       "Icon7.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Solver_alias", "Run the analysis"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Solver_alias", "Run the analysis.")}
+        return {
+            "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon7.png"),
+            "MenuText": QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Solver_alias", "Run the analysis"
+            ),
+            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Solver_alias", "Run the analysis."
+            ),
+        }
 
     #  -------------------------------------------------------------------------
     def IsActive(self):
-        """ Determine if the command/icon must be active or greyed out """
+        """Determine if the command/icon must be active or greyed out"""
 
         return DapTools.getActiveContainer() is not None
 
     #  -------------------------------------------------------------------------
     def Activated(self):
-        """ Called when the Solver command is run """
-        
+        """Called when the Solver command is run"""
+
         if Debug:
             FreeCAD.Console.PrintMessage("Running: Solver\n")
 
         import DapTools
         import DapSolverRunner
+
         solverObject = DapTools.getSolverObject()
         if solverObject == None:
             DapTools.getActiveContainer().addObject(DapSolverRunner.makeDapSolver())
@@ -89,38 +132,116 @@ class _DapSolver:
     #  -------------------------------------------------------------------------
     def initProperties(self, obj):
         """ """
-        addObjectProperty(obj, 'XVector', 0.0, "App::PropertyFloat", "", "Vector in X-Direction")
-        addObjectProperty(obj, 'YVector', 0.0, "App::PropertyFloat", "", "Vector in Y-Direction")
-        addObjectProperty(obj, 'ZVector', 0.0, "App::PropertyFloat", "", "Vector in Z-Direction")
-        addObjectProperty(obj, 'FileDirectory', "", "App::PropertyString", "", "Location where Solver Results will be Stored")
-        addObjectProperty(obj, 'MotionPlane', MOTION_PLANES, "App::PropertyEnumeration", "", "Plane of Motion")
-        addObjectProperty(obj, 'SelectionType', SELECTION_TYPE, "App::PropertyEnumeration", "", "Type of Custom Plane Selection")
+        addObjectProperty(
+            obj, "XVector", 0.0, "App::PropertyFloat", "", "Vector in X-Direction"
+        )
+        addObjectProperty(
+            obj, "YVector", 0.0, "App::PropertyFloat", "", "Vector in Y-Direction"
+        )
+        addObjectProperty(
+            obj, "ZVector", 0.0, "App::PropertyFloat", "", "Vector in Z-Direction"
+        )
+        addObjectProperty(
+            obj,
+            "FileDirectory",
+            "",
+            "App::PropertyString",
+            "",
+            "Location where Solver Results will be Stored",
+        )
+        addObjectProperty(
+            obj,
+            "MotionPlane",
+            MOTION_PLANES,
+            "App::PropertyEnumeration",
+            "",
+            "Plane of Motion",
+        )
+        addObjectProperty(
+            obj,
+            "SelectionType",
+            SELECTION_TYPE,
+            "App::PropertyEnumeration",
+            "",
+            "Type of Custom Plane Selection",
+        )
         # addObjectProperty(obj, 'ObjectEntities', [], "App::PropertyStringList", "", "Objects used for Plane Definition")
-        addObjectProperty(obj, 'PlaneObjectName', "", "App::PropertyString", "", "Name of object to create custom plane of motion")
-        addObjectProperty(obj, 'StartTime', 0.0, "App::PropertyFloat", "", "Start Time")
-        addObjectProperty(obj, 'EndTime', 0.5, "App::PropertyFloat", "", "Start Time")
-        addObjectProperty(obj, 'ReportingTimeStep', 0.01, "App::PropertyFloat", "", "Time intervals for the solution")
-        addObjectProperty(obj, "UnitVector", FreeCAD.Vector(0, 0, 0), "App::PropertyVector", "", "Vector Normal to Planar Motion")
-        addObjectProperty(obj, 'DapResults', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'ReportedTimes', None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(
+            obj,
+            "PlaneObjectName",
+            "",
+            "App::PropertyString",
+            "",
+            "Name of object to create custom plane of motion",
+        )
+        addObjectProperty(obj, "StartTime", 0.0, "App::PropertyFloat", "", "Start Time")
+        addObjectProperty(obj, "EndTime", 0.5, "App::PropertyFloat", "", "Start Time")
+        addObjectProperty(
+            obj,
+            "ReportingTimeStep",
+            0.01,
+            "App::PropertyFloat",
+            "",
+            "Time intervals for the solution",
+        )
+        addObjectProperty(
+            obj,
+            "UnitVector",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyVector",
+            "",
+            "Vector Normal to Planar Motion",
+        )
+        addObjectProperty(obj, "DapResults", None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(
+            obj, "ReportedTimes", None, "App::PropertyPythonObject", "", ""
+        )
         # addObjectProperty(obj, 'BodiesCoG', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Bodies_r', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Bodies_p', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Points_r', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Points_r_d', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Bodies_p_d', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Bodies_r_d', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Bodies_p_d_d', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'Bodies_r_d_d', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'kinetic_energy', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'potential_energy', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'total_energy', None, "App::PropertyPythonObject", "", "")
-        addObjectProperty(obj, 'object_to_point', {}, "App::PropertyPythonObject", "",
-                          "Dictionary linking FC object (eg joint) to DAP point, required for postProcessing")
-        addObjectProperty(obj, 'object_to_moving_body', {}, "App::PropertyPythonObject", "",
-                          "Dictionary linking FC object to DAP body, required for postProcessing (only moving bodies used)")
-        addObjectProperty(obj, 'global_rotation_matrix', FreeCAD.Matrix(),
-                          "App::PropertyMatrix", "", "Global orthonormal rotation matrix")
+        addObjectProperty(obj, "Bodies_r", None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(obj, "Bodies_p", None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(obj, "Points_r", None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(obj, "Points_r_d", None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(obj, "Bodies_p_d", None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(obj, "Bodies_r_d", None, "App::PropertyPythonObject", "", "")
+        addObjectProperty(
+            obj, "Bodies_p_d_d", None, "App::PropertyPythonObject", "", ""
+        )
+        addObjectProperty(
+            obj, "Bodies_r_d_d", None, "App::PropertyPythonObject", "", ""
+        )
+        addObjectProperty(
+            obj, "kinetic_energy", None, "App::PropertyPythonObject", "", ""
+        )
+        addObjectProperty(
+            obj, "potential_energy", None, "App::PropertyPythonObject", "", ""
+        )
+        addObjectProperty(
+            obj, "total_energy", None, "App::PropertyPythonObject", "", ""
+        )
+        addObjectProperty(
+            obj,
+            "object_to_point",
+            {},
+            "App::PropertyPythonObject",
+            "",
+            "Dictionary linking FC object (eg joint) to DAP point, required for postProcessing",
+        )
+        addObjectProperty(
+            obj,
+            "object_to_moving_body",
+            {},
+            "App::PropertyPythonObject",
+            "",
+            "Dictionary linking FC object to DAP body, required for postProcessing (only moving bodies used)",
+        )
+        addObjectProperty(
+            obj,
+            "global_rotation_matrix",
+            FreeCAD.Matrix(),
+            "App::PropertyMatrix",
+            "",
+            "Global orthonormal rotation matrix",
+        )
         return
 
     #  -------------------------------------------------------------------------
@@ -173,11 +294,13 @@ class _DapSolver:
                     obj.setEditorMode("SelectionType", 0)
                     obj.setEditorMode("UnitVector", 1)
             if (obj.XVector != 0) or (obj.YVector != 0) or (obj.ZVector != 0):
-                mag = (obj.XVector**2 + obj.YVector**2 + obj.ZVector**2)**0.5
+                mag = (obj.XVector ** 2 + obj.YVector ** 2 + obj.ZVector ** 2) ** 0.5
                 rounder = 3
-                obj.UnitVector = FreeCAD.Vector(round(obj.XVector / mag, rounder),
-                                                round(obj.YVector / mag, rounder),
-                                                round(obj.ZVector / mag, rounder))
+                obj.UnitVector = FreeCAD.Vector(
+                    round(obj.XVector / mag, rounder),
+                    round(obj.YVector / mag, rounder),
+                    round(obj.ZVector / mag, rounder),
+                )
         if prop == "SelectionType":
             if obj.SelectionType == "Object Selection":
                 if hasattr(obj, "XVector"):
@@ -192,14 +315,22 @@ class _DapSolver:
                     obj.setEditorMode("YVector", 0)
                     obj.setEditorMode("ZVector", 0)
                     obj.setEditorMode("UnitVector", 1)
-        if hasattr(obj, "XVector") and hasattr(obj, "YVector") and hasattr(obj, "ZVector"):
+        if (
+            hasattr(obj, "XVector")
+            and hasattr(obj, "YVector")
+            and hasattr(obj, "ZVector")
+        ):
             if prop == "XVector" or prop == "YVector" or prop == "ZVector":
                 if (obj.XVector != 0) or (obj.YVector != 0) or (obj.ZVector != 0):
-                    mag = (obj.XVector**2 + obj.YVector**2 + obj.ZVector**2)**0.5
+                    mag = (
+                        obj.XVector ** 2 + obj.YVector ** 2 + obj.ZVector ** 2
+                    ) ** 0.5
                     rounder = 3
-                    obj.UnitVector = FreeCAD.Vector(round(obj.XVector / mag, rounder),
-                                                    round(obj.YVector / mag, rounder),
-                                                    round(obj.ZVector / mag, rounder))
+                    obj.UnitVector = FreeCAD.Vector(
+                        round(obj.XVector / mag, rounder),
+                        round(obj.YVector / mag, rounder),
+                        round(obj.ZVector / mag, rounder),
+                    )
 
     #  -------------------------------------------------------------------------
     def __setstate__(self, state):
@@ -259,13 +390,14 @@ class _ViewProviderDapSolver:
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCAD.Console.PrintError("Task dialog already active\n")
         return True
 
     #  -------------------------------------------------------------------------
     def setEdit(self, vobj, mode):
         """ """
         import _TaskPanelDapSolver
+
         taskd = _TaskPanelDapSolver.TaskPanelDapSolver(self.Object)
         FreeCADGui.Control.showDialog(taskd)
         return True

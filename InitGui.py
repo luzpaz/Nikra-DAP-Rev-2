@@ -29,6 +29,7 @@
 # *                                                                                  *
 # *     Author(s) of this file:                                                      *
 # *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
 # *          Cecil Churms <churms@gmail.com>                                         *
 # *                                                                                  *
 # ************************************************************************************
@@ -40,11 +41,11 @@ Debug = True
 
 # =============================================================================
 class DapWorkbench(Workbench):
-    """ This class encompasses the whole DAP workbench """
+    """This class encompasses the whole DAP workbench"""
 
     #  -------------------------------------------------------------------------
     def __init__(self):
-        """ Called on startup of FreeCAD """
+        """Called on startup of FreeCAD"""
 
         if Debug:
             FreeCAD.Console.PrintMessage("Running: DapWorkbench->__init__\n")
@@ -53,15 +54,17 @@ class DapWorkbench(Workbench):
         import DapTools
 
         # Set up the text for the DAP workbench option, the Nikra-DAP icon, and the tooltip
-        self.__class__.Icon = os.path.join(DapTools.get_module_path(),
-                                           "icons",
-                                           "Icon1.png")
+        self.__class__.Icon = os.path.join(
+            DapTools.get_module_path(), "icons", "Icon1.png"
+        )
         self.__class__.MenuText = "Nikra-DAP"
-        self.__class__.ToolTip = "Planar multibody dynamics workbench based on Prof. Nikravesh's DAP solver"
+        self.__class__.ToolTip = (
+            "Planar multibody dynamics workbench based on Prof. Nikravesh's DAP solver"
+        )
 
     #  -------------------------------------------------------------------------
     def Initialize(self):
-        """ Called on the first selection of the DapWorkbench """
+        """Called on the first selection of the DapWorkbench"""
 
         if Debug:
             FreeCAD.Console.PrintMessage("Running: DapWorkbench->Initialize\n")
@@ -96,25 +99,26 @@ class DapWorkbench(Workbench):
 
     #  -------------------------------------------------------------------------
     def MakeCommandList(self):
-        """ Define a list of our aliases for all the DAP functions
-        TODO: Add "Dap_Point_alias" when it is implemented """
+        """Define a list of our aliases for all the DAP functions
+        TODO: Add "Dap_Point_alias" when it is implemented"""
 
-        return ["Dap_Container_alias",
-                "Separator",
-                "Dap_Body_alias",
-                "Dap_Joint_alias",
-                "Dap_Material_alias",
-                "Dap_Force_alias",
-                "Separator",
-                "Dap_Solver_alias",
-                "Separator",
-                "Dap_Animation_alias",
-                "Dap_Plot_alias",
-                ]
+        return [
+            "Dap_Container_alias",
+            "Separator",
+            "Dap_Body_alias",
+            "Dap_Joint_alias",
+            "Dap_Material_alias",
+            "Dap_Force_alias",
+            "Separator",
+            "Dap_Solver_alias",
+            "Separator",
+            "Dap_Animation_alias",
+            "Dap_Plot_alias",
+        ]
 
     #  -------------------------------------------------------------------------
     def Activated(self):
-        """ Called when the Animation command is run """
+        """Called when the Animation command is run"""
 
         if Debug:
             FreeCAD.Console.PrintMessage("Running Animation\n")
@@ -123,23 +127,23 @@ class DapWorkbench(Workbench):
 
     #  -------------------------------------------------------------------------
     def Deactivated(self):
-        """ This function is executed each time the DAP workbench is deactivated """
+        """This function is executed each time the DAP workbench is deactivated"""
 
         return
 
     #  -------------------------------------------------------------------------
     def ContextMenu(self, recipient):
-        """ This is executed whenever the user right-clicks on screen
+        """This is executed whenever the user right-clicks on screen
         'recipient' will be 'view' when mouse is in the VIEW window
-        'recipient' will be 'tree' when mouse is in the TREE window """
+        'recipient' will be 'tree' when mouse is in the TREE window"""
 
         # Append the DAP commands to the existing context menu
         self.appendContextMenu("Nikra-DAP Commands", self.MakeCommandList())
 
     #  -------------------------------------------------------------------------
     def GetClassName(self):
-        """ This function is mandatory if this is a full Python workbench
-        The returned string should be exactly 'Gui::PythonWorkbench' """
+        """This function is mandatory if this is a full Python workbench
+        The returned string should be exactly 'Gui::PythonWorkbench'"""
 
         return "Gui::PythonWorkbench"
 

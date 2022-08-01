@@ -1,10 +1,46 @@
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
+
 import FreeCAD
 
 import os
 import os.path
 import DapTools
 import DapBodySelection
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -17,7 +53,7 @@ Debug = True
 
 # =============================================================================
 class TaskPanelDapMaterial:
-    """ Taskpanel for adding DAP Bodies """
+    """Taskpanel for adding DAP Bodies"""
 
     #  -------------------------------------------------------------------------
     def __init__(self, obj):
@@ -28,7 +64,10 @@ class TaskPanelDapMaterial:
         self.fetchFreeCADMaterials()
         self.doc_name = self.obj.Document.Name
         self.doc = FreeCAD.getDocument(self.doc_name)
-        self.parts_shape_list_all, self.parent_assembly_all = DapTools.getSolidsFromAllShapes(self.doc)
+        (
+            self.parts_shape_list_all,
+            self.parent_assembly_all,
+        ) = DapTools.getSolidsFromAllShapes(self.doc)
         # FreeCAD.Console.PrintMessage("all parts shape " + str(self.parts_shape_list_all) + "\n")
         # FreeCAD.Console.PrintMessage("all parent assembly " + str(self.parent_assembly_all) + "\n")
         ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelDapMaterials.ui")
@@ -68,9 +107,13 @@ class TaskPanelDapMaterial:
             combo_box_object = self.form.tableWidget.cellWidget(row, 1)
             mat_index = combo_box_object.currentIndex()
             current_mat_choice = self.card_name_list[mat_index]
-            density_quantity = DapTools.getQuantity(self.form.tableWidget.cellWidget(row, col))
-            self.MaterialDictionary[part_label] = {"matName": current_mat_choice[0],
-                                                   "density": density_quantity}
+            density_quantity = DapTools.getQuantity(
+                self.form.tableWidget.cellWidget(row, col)
+            )
+            self.MaterialDictionary[part_label] = {
+                "matName": current_mat_choice[0],
+                "density": density_quantity,
+            }
 
     #  -------------------------------------------------------------------------
     def fetchFreeCADMaterials(self):
@@ -78,6 +121,7 @@ class TaskPanelDapMaterial:
         #  Prepulate list of available material properties in FreeCAD
         #  The following snippet of code comes from MaterialEditor.py by Yorik van Havre, Bernd Hahnebach
         from materialtools.cardutils import import_materials as getmats
+
         self.materials, self.cards, self.icons = getmats()
         self.card_name_list = []  # [ [card_name, card_path, icon_path], ... ]
         self.card_name_labels = []
@@ -101,12 +145,16 @@ class TaskPanelDapMaterial:
                     # shape_label_list = DapTools.getListOfSolidsFromShape(obj, [])
                     shape_label_list = self.parts_shape_list_all[obj.Label]
                     for sub_shape_label in shape_label_list:
-                        if not(sub_shape_label in self.MaterialDictionary.keys()):
+                        if not (sub_shape_label in self.MaterialDictionary.keys()):
                             mat_name = self.card_name_labels[0]
                             density = self.default_density
                             self.MaterialDictionary[sub_shape_label] = {}
-                            self.MaterialDictionary[sub_shape_label]["matName"] = mat_name
-                            self.MaterialDictionary[sub_shape_label]["density"] = density
+                            self.MaterialDictionary[sub_shape_label][
+                                "matName"
+                            ] = mat_name
+                            self.MaterialDictionary[sub_shape_label][
+                                "density"
+                            ] = density
 
     #  -------------------------------------------------------------------------
     def bodyComboSelectionChanged(self):
@@ -117,7 +165,9 @@ class TaskPanelDapMaterial:
         # doc = FreeCAD.getDocument(docName)
         self.form.tableWidget.clearContents()
         self.form.tableWidget.setRowCount(0)
-        self.form.tableWidget.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.form.tableWidget.horizontalHeader().setResizeMode(
+            QtGui.QHeaderView.ResizeToContents
+        )
         if len(self.body_labels):
             selection_object = self.doc.getObjectsByLabel(self.body_labels[ci])[0]
             list_of_parts = selection_object.References
@@ -173,8 +223,10 @@ class TaskPanelDapMaterial:
         self.addDensityItemToTable(density, current_row, index)
         part_label = self.form.tableWidget.item(current_row, 0).text()
         self.form.tableWidget.resizeColumnsToContents()
-        self.MaterialDictionary[part_label] = {"matName": current_mat_choice[0],
-                                               "density": density}
+        self.MaterialDictionary[part_label] = {
+            "matName": current_mat_choice[0],
+            "density": density,
+        }
 
     #  -------------------------------------------------------------------------
     def addDensityItemToTable(self, density, current_row, mat_index):
@@ -205,7 +257,9 @@ class TaskPanelDapMaterial:
             # switch documents. To circumvent this, if the subpart is part of a subassemlby then the subassemlby
             # will be added to the selection list.
             if self.parent_assembly_all[selection_object_label] != None:
-                selection_object = doc.getObjectsByLabel(self.parent_assembly_all[selection_object_label])[0]
+                selection_object = doc.getObjectsByLabel(
+                    self.parent_assembly_all[selection_object_label]
+                )[0]
             else:
                 selection_object = doc.getObjectsByLabel(selection_object_label)[0]
             # selection_object = doc.findObjects(Label = selection_object_label)[0]

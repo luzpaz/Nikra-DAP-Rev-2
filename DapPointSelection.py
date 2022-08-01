@@ -1,4 +1,40 @@
-# *        -  Varnu Govender (UP) <govender.v@tuks.co.za>                            *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Varnu Govender (UP) <govender.v@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
+
 from lib2to3.pytree import Base
 import FreeCAD
 import os
@@ -6,6 +42,7 @@ import DapTools
 from DapTools import addObjectProperty
 from pivy import coin
 import Part
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -32,25 +69,26 @@ class _CommandDapPoint:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """ Set up the menu text, the icon, and the tooltip """
+        """Called by FreeCAD when addCommand is run in InitGui.py
+        Returns a dictionary defining the icon, the menu text and the tooltip"""
 
-        return {'Pixmap': os.path.join(DapTools.get_module_path(),
-                                       "icons",
-                                       "Icon8.png"),
-            'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Point_alias",
-                                                 "Add Point"),
-            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Point_alias",
-                                                "Creates and defines a point for the DAP analysis")}
+        return {
+            "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon8.png"),
+            "MenuText": QtCore.QT_TRANSLATE_NOOP("Dap_Point_alias", "Add Point"),
+            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Point_alias", "Creates and defines a point for the DAP analysis"
+            ),
+        }
 
     #  -------------------------------------------------------------------------
     def IsActive(self):
-        """ Determine if the command/icon must be active or greyed out """
+        """Determine if the command/icon must be active or greyed out"""
 
         return DapTools.getActiveContainer() is not None
 
     #  -------------------------------------------------------------------------
     def Activated(self):
-        """ Called when the Animation command is run """
+        """Called when the Animation command is run"""
         if Debug:
             FreeCAD.Console.PrintMessage("Running Animation\n")
 
@@ -64,6 +102,7 @@ class _CommandDapPoint:
         # FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
         import DapTools
         import DapPointSelection
+
         DapTools.getActiveContainer().addObject(DapPointSelection.makeDapPoint())
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
@@ -81,16 +120,36 @@ class _DapPoint:
     #  -------------------------------------------------------------------------
     def initProperties(self, obj):
         """ """
-        addObjectProperty(obj, 'Point', "", "App::PropertyString", "", "Point label")
-        addObjectProperty(obj, 'PointCoord', FreeCAD.Vector(0, 0, 0), "App::PropertyVector", "", "Point Vector")
-        addObjectProperty(obj, 'pointCoordList', [], "App::PropertyVectorList", "", "List of Point Vectors")
-        addObjectProperty(obj, 'pointList', [], "App::PropertyStringList", "", "List of Points")
-        addObjectProperty(obj, 'bodyNameList', [], "App::PropertyStringList", "", "List of Points")
-        addObjectProperty(obj, 'pointAssignList', [], "App::PropertyStringList", "", "List of Points")
-        obj.setEditorMode('bodyNameList', 2)
-        obj.setEditorMode('pointList', 2)
-        obj.setEditorMode('Point', 2)
-        obj.setEditorMode('PointCoord', 2)
+        addObjectProperty(obj, "Point", "", "App::PropertyString", "", "Point label")
+        addObjectProperty(
+            obj,
+            "PointCoord",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyVector",
+            "",
+            "Point Vector",
+        )
+        addObjectProperty(
+            obj,
+            "pointCoordList",
+            [],
+            "App::PropertyVectorList",
+            "",
+            "List of Point Vectors",
+        )
+        addObjectProperty(
+            obj, "pointList", [], "App::PropertyStringList", "", "List of Points"
+        )
+        addObjectProperty(
+            obj, "bodyNameList", [], "App::PropertyStringList", "", "List of Points"
+        )
+        addObjectProperty(
+            obj, "pointAssignList", [], "App::PropertyStringList", "", "List of Points"
+        )
+        obj.setEditorMode("bodyNameList", 2)
+        obj.setEditorMode("pointList", 2)
+        obj.setEditorMode("Point", 2)
+        obj.setEditorMode("PointCoord", 2)
 
     #  -------------------------------------------------------------------------
     def onDocumentRestored(self, obj):
@@ -184,13 +243,14 @@ class _ViewProviderDapForce:
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCAD.Console.PrintError("Task dialog already active\n")
         return True
 
     #  -------------------------------------------------------------------------
     def setEdit(self, vobj, mode):
         """ """
         import _TaskPanelDapPoint
+
         taskd = _TaskPanelDapPoint.TaskPanelDapPoint(self.Object)
         # for obj in FreeCAD.ActiveDocument.Objects:
         #    # if obj.isDerivedFrom("Fem::FemMeshObject"):

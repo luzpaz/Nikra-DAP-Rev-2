@@ -1,5 +1,39 @@
-# *        -  Dewald Hattingh (UP) <u17082006@tuks.co.za>                            *
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Dewald Hattingh (UP) <u17082006@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
 
 import FreeCAD
 
@@ -12,6 +46,7 @@ import DapSolverRunner
 import numpy as np
 import math
 import time
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -24,7 +59,7 @@ Debug = True
 
 # =============================================================================
 class TaskPanelDapSolver:
-    """ Taskpanel for Executing DAP Solver User Interface """
+    """Taskpanel for Executing DAP Solver User Interface"""
 
     #  -------------------------------------------------------------------------
     def __init__(self, obj):
@@ -46,12 +81,20 @@ class TaskPanelDapSolver:
         self.form.cmbPlaneofMotion.addItems(DapSolverRunner.MOTION_PLANES)
         self.form.cmbSelectType.addItems(DapSolverRunner.SELECTION_TYPE)
         #  On reload, check to see if item already exists, and set dropbox item appropriately for both Comboboxes
-        biMotionPlane = DapTools.indexOrDefault(DapSolverRunner.MOTION_PLANES, self.obj.MotionPlane, 0)
+        biMotionPlane = DapTools.indexOrDefault(
+            DapSolverRunner.MOTION_PLANES, self.obj.MotionPlane, 0
+        )
         self.form.cmbPlaneofMotion.setCurrentIndex(biMotionPlane)
-        self.form.lblPlaneDescr.setText(DapSolverRunner.MOTION_PLANES_HELPER_TEXT[biMotionPlane])
-        biSelectType = DapTools.indexOrDefault(DapSolverRunner.SELECTION_TYPE, self.obj.SelectionType, 0)
+        self.form.lblPlaneDescr.setText(
+            DapSolverRunner.MOTION_PLANES_HELPER_TEXT[biMotionPlane]
+        )
+        biSelectType = DapTools.indexOrDefault(
+            DapSolverRunner.SELECTION_TYPE, self.obj.SelectionType, 0
+        )
         self.form.cmbSelectType.setCurrentIndex(biSelectType)
-        self.form.lblSelectDescr.setText(DapSolverRunner.SELECTION_TYPE_HELPER_TEXT[biSelectType])
+        self.form.lblSelectDescr.setText(
+            DapSolverRunner.SELECTION_TYPE_HELPER_TEXT[biSelectType]
+        )
         self.form.solveButton.clicked.connect(self.solveButtonClicked)
         self.form.pbBrowseFileDirectory.clicked.connect(self.getFolderDirectory)
         # self.form.pbAddRef.clicked.connect(self.addButtonClicked)
@@ -150,7 +193,9 @@ class TaskPanelDapSolver:
     def cmbPlaneChanged(self):  # Mod
         """ """
         type_index = self.form.cmbPlaneofMotion.currentIndex()
-        self.form.lblPlaneDescr.setText(DapSolverRunner.MOTION_PLANES_HELPER_TEXT[type_index])
+        self.form.lblPlaneDescr.setText(
+            DapSolverRunner.MOTION_PLANES_HELPER_TEXT[type_index]
+        )
         self.MotionPlane = DapSolverRunner.MOTION_PLANES[type_index]
         self.checkPlane()
         self.rebuildConditions()
@@ -159,22 +204,25 @@ class TaskPanelDapSolver:
     def cmbSelectChanged(self):
         """ """
         type_index = self.form.cmbSelectType.currentIndex()
-        self.form.lblSelectDescr.setText(DapSolverRunner.SELECTION_TYPE_HELPER_TEXT[type_index])
+        self.form.lblSelectDescr.setText(
+            DapSolverRunner.SELECTION_TYPE_HELPER_TEXT[type_index]
+        )
         self.SelectionType = DapSolverRunner.SELECTION_TYPE[type_index]
         self.checkSelectType()
         self.rebuildConditions()
         return
+
     #  -------------------------------------------------------------------------
     # def addButtonClicked(self):
-        # sel = FreeCADGui.Selection.getSelectionEx()[0]
-        # sel_name = sel.SubElementNames
-        # #for i in range(0, len(sel_name)):
-        #    # #if sel_name[i] in self.ObjectEntities:
-        #        # #FreeCAD.Console.PrintError("\n Error:  The selected object has already been referenced \n")
-        #    # #else:
-        #        # #self.ObjectEntities.append(sel_name[i])
-        # self.rebuildObjectList()
-        # return
+    # sel = FreeCADGui.Selection.getSelectionEx()[0]
+    # sel_name = sel.SubElementNames
+    # #for i in range(0, len(sel_name)):
+    #    # #if sel_name[i] in self.ObjectEntities:
+    #        # #FreeCAD.Console.PrintError("\n Error:  The selected object has already been referenced \n")
+    #    # #else:
+    #        # #self.ObjectEntities.append(sel_name[i])
+    # self.rebuildObjectList()
+    # return
     #  -------------------------------------------------------------------------
     # def removeButtonClicked(self):
     #    # if not self.ObjectEntities:
@@ -207,7 +255,11 @@ class TaskPanelDapSolver:
     #  -------------------------------------------------------------------------
     def checkPlane(self):
         """ """
-        if self.MotionPlane == "X-Y Plane" or self.MotionPlane == "Y-Z Plane" or self.MotionPlane == "X-Z Plane":
+        if (
+            self.MotionPlane == "X-Y Plane"
+            or self.MotionPlane == "Y-Z Plane"
+            or self.MotionPlane == "X-Z Plane"
+        ):
             if self.MotionPlane == "X-Y Plane":
                 self.XVector = 0.0
                 self.YVector = 0.0
@@ -221,11 +273,13 @@ class TaskPanelDapSolver:
                 self.YVector = 1.0
                 self.ZVector = 0.0
             if (self.XVector != 0) or (self.YVector != 0) or (self.ZVector != 0):
-                mag = (self.XVector**2 + self.YVector**2 + self.ZVector**2)**0.5
+                mag = (self.XVector ** 2 + self.YVector ** 2 + self.ZVector ** 2) ** 0.5
                 rounder = 3
-                self.UnitVector = FreeCAD.Vector(round(self.XVector / mag, rounder),
-                                                 round(self.YVector / mag, rounder),
-                                                 round(self.ZVector / mag, rounder))
+                self.UnitVector = FreeCAD.Vector(
+                    round(self.XVector / mag, rounder),
+                    round(self.YVector / mag, rounder),
+                    round(self.ZVector / mag, rounder),
+                )
             self.form.lblPlaneSelectType.setHidden(True)
             self.form.cmbSelectType.setHidden(True)
             self.form.lblDescription2.setHidden(True)
@@ -255,16 +309,20 @@ class TaskPanelDapSolver:
         sel = FreeCADGui.Selection.getSelectionEx()
         if len(sel) > 0:
             if len(sel) > 1 or len(sel[0].SubElementNames) > 1:
-                FreeCAD.Console.PrintError("Only a single face, sketch or plane should be selected.\n")
+                FreeCAD.Console.PrintError(
+                    "Only a single face, sketch or plane should be selected.\n"
+                )
             else:
                 changed = False
                 if len(sel[0].SubElementNames) == 1:
-                    if 'Face' in sel[0].SubElementNames[0]:
+                    if "Face" in sel[0].SubElementNames[0]:
                         face = sel[0].Object.getSubObject(sel[0].SubElementNames[0])
                         normal = face.normalAt(0, 0)
-                        self.form.planarObjectLabel.setText(sel[0].Object.Label + ":" + str(sel[0].SubElementNames[0]))
+                        self.form.planarObjectLabel.setText(
+                            sel[0].Object.Label + ":" + str(sel[0].SubElementNames[0])
+                        )
                         changed = True
-                elif sel[0].Object.TypeId == 'Sketcher::SketchObject':
+                elif sel[0].Object.TypeId == "Sketcher::SketchObject":
                     support_name = sel[0].Object.Support[0][0].Name
                     sub_shape = sel[0].Object.Support[0][1]
                     if "XY_Plane" in support_name:
@@ -281,10 +339,10 @@ class TaskPanelDapSolver:
                         face = sel[0].Object.Support[0][0].getSubObject(sub_shape[0])
                         normal = face.normalAt(0, 0)
                         changed = True
-                elif sel[0].Object.TypeId == 'Part::Plane':
+                elif sel[0].Object.TypeId == "Part::Plane":
                     normal = sel[0].Object.Shape.Faces[0].normalAt(0, 0)
                     changed = True
-                elif sel[0].Object.TypeId == 'App::Plane':
+                elif sel[0].Object.TypeId == "App::Plane":
                     role = sel[0].Object.Role
                     if "XY_Plane" in role:
                         normal = FreeCAD.Vector(0, 0, 1)
@@ -296,7 +354,11 @@ class TaskPanelDapSolver:
                         normal = FreeCAD.Vector(1, 0, 0)
                         changed = True
                 else:
-                    FreeCAD.Console.PrintError("Can not identify normal from " + str(sel[0].Object.Label) + "object \n")
+                    FreeCAD.Console.PrintError(
+                        "Can not identify normal from "
+                        + str(sel[0].Object.Label)
+                        + "object \n"
+                    )
                 if changed:
                     self.XVector = normal.x
                     self.YVector = normal.y
@@ -372,6 +434,7 @@ class TaskPanelDapSolver:
             self.obj.setEditorMode("XVector", 0)
             self.obj.setEditorMode("YVector", 0)
             self.obj.setEditorMode("ZVector", 0)
+
     #  -------------------------------------------------------------------------
     # def rebuildObjectList(self):
     #    # self.form.lstObjectEntities.clear()
@@ -425,6 +488,8 @@ class TaskPanelDapSolver:
     #  -------------------------------------------------------------------------
     def printUnitVector(self):
         """ """
-        self.form.lblUnitVecOut.setText("{:5.2f}{:5.2f}{:5.2f}".format(self.UnitVector.x,
-                                                                       self.UnitVector.y,
-                                                                       self.UnitVector.z))
+        self.form.lblUnitVecOut.setText(
+            "{:5.2f}{:5.2f}{:5.2f}".format(
+                self.UnitVector.x, self.UnitVector.y, self.UnitVector.z
+            )
+        )

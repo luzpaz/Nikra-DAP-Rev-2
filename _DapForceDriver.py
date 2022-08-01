@@ -1,4 +1,39 @@
-# *        -  Varnu Govender (UP) <govender.v@tuks.co.za>
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Varnu Govender (UP) <govender.v@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
 
 import FreeCAD
 
@@ -69,8 +104,12 @@ class DapForceDriver:
             self.obj.c_Checker = False
             self.obj.tStartDriverFuncTypeB = DapTools.getQuantity(self.form.tStartFuncB)
             self.obj.tEndDriverFuncTypeB = DapTools.getQuantity(self.form.tEndFuncB)
-            self.obj.initialValueDriverFuncTypeB = DapTools.getQuantity(self.form.startValueFuncB)
-            self.obj.endValueDriverFuncTypeB = DapTools.getQuantity(self.form.endValueFuncB)
+            self.obj.initialValueDriverFuncTypeB = DapTools.getQuantity(
+                self.form.startValueFuncB
+            )
+            self.obj.endValueDriverFuncTypeB = DapTools.getQuantity(
+                self.form.endValueFuncB
+            )
             DapTools.setQuantity(self.form.tEndFuncA, 0.0)
             DapTools.setQuantity(self.form.FuncACoefC1, 0.0)
             DapTools.setQuantity(self.form.FuncACoefC2, 0.0)
@@ -85,8 +124,12 @@ class DapForceDriver:
             self.obj.b_Checker = False
             self.obj.tStartDriverFuncTypeC = DapTools.getQuantity(self.form.tStartFuncC)
             self.obj.tEndDriverFuncTypeC = DapTools.getQuantity(self.form.tEndFuncC)
-            self.obj.initialValueDriverFuncTypeC = DapTools.getQuantity(self.form.startValueFuncC)
-            self.obj.endDerivativeDriverFuncTypeC = DapTools.getQuantity(self.form.endDerivativeFuncC)
+            self.obj.initialValueDriverFuncTypeC = DapTools.getQuantity(
+                self.form.startValueFuncC
+            )
+            self.obj.endDerivativeDriverFuncTypeC = DapTools.getQuantity(
+                self.form.endDerivativeFuncC
+            )
             DapTools.setQuantity(self.form.tEndFuncA, 0.0)
             DapTools.setQuantity(self.form.FuncACoefC1, 0.0)
             DapTools.setQuantity(self.form.FuncACoefC2, 0.0)
@@ -127,12 +170,18 @@ class DapForceDriver:
         DapTools.setQuantity(self.form.FuncACoefC3, self.obj.coefC3DriverFuncTypeA)
         DapTools.setQuantity(self.form.tStartFuncB, self.obj.tStartDriverFuncTypeB)
         DapTools.setQuantity(self.form.tEndFuncB, self.obj.tEndDriverFuncTypeB)
-        DapTools.setQuantity(self.form.startValueFuncB, self.obj.initialValueDriverFuncTypeB)
+        DapTools.setQuantity(
+            self.form.startValueFuncB, self.obj.initialValueDriverFuncTypeB
+        )
         DapTools.setQuantity(self.form.endValueFuncB, self.obj.endValueDriverFuncTypeB)
         DapTools.setQuantity(self.form.tStartFuncC, self.obj.tStartDriverFuncTypeC)
         DapTools.setQuantity(self.form.tEndFuncC, self.obj.tEndDriverFuncTypeC)
-        DapTools.setQuantity(self.form.startValueFuncC, self.obj.initialValueDriverFuncTypeC)
-        DapTools.setQuantity(self.form.endDerivativeFuncC, self.obj.endDerivativeDriverFuncTypeC)
+        DapTools.setQuantity(
+            self.form.startValueFuncC, self.obj.initialValueDriverFuncTypeC
+        )
+        DapTools.setQuantity(
+            self.form.endDerivativeFuncC, self.obj.endDerivativeDriverFuncTypeC
+        )
         if self.obj.a_Checker:
             self.form.radtype_a.setChecked(True)
         if self.obj.b_Checker:

@@ -1,7 +1,50 @@
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
+
 import os
 import sys
 import numpy as np
-from DapStructures import Body_struct, Force_struct, Joint_struct, Point_struct, Unit_struct, Funct_struct
+from DapStructures import (
+    Body_struct,
+    Force_struct,
+    Joint_struct,
+    Point_struct,
+    Unit_struct,
+    Funct_struct,
+)
 from DapHelperfunctions import RotMatrix, RotMatrix90
 
 # Select if we want to be in debug mode
@@ -10,7 +53,7 @@ Debug = True
 
 
 # =============================================================================
-class DapSolver():
+class DapSolver:
 
     #  -------------------------------------------------------------------------
     def __init__(self, folder):
@@ -23,12 +66,12 @@ class DapSolver():
     #  -------------------------------------------------------------------------
     def readInputFiles(self):
         """ """
-        exec(open(os.path.join(self.folder, 'inBodies.py')).read())
-        exec(open(os.path.join(self.folder, 'inForces.py')).read())
-        exec(open(os.path.join(self.folder, 'inFuncts.py')).read())
-        exec(open(os.path.join(self.folder, 'inJoints.py')).read())
-        exec(open(os.path.join(self.folder, 'inPoints.py')).read())
-        exec(open(os.path.join(self.folder, 'inUvectors.py')).read())
+        exec(open(os.path.join(self.folder, "inBodies.py")).read())
+        exec(open(os.path.join(self.folder, "inForces.py")).read())
+        exec(open(os.path.join(self.folder, "inFuncts.py")).read())
+        exec(open(os.path.join(self.folder, "inJoints.py")).read())
+        exec(open(os.path.join(self.folder, "inPoints.py")).read())
+        exec(open(os.path.join(self.folder, "inUvectors.py")).read())
         self.Bodies = Bodies
         self.Forces = Forces
         self.Functs = Functs
@@ -55,8 +98,16 @@ class DapSolver():
         for Bi in range(self.nB):
             is_ = 3 * Bi
             ie = is_ + 3
-            self.M_array[is_:ie, 0] = [self.Bodies[Bi, 0].m, self.Bodies[Bi, 0].m, self.Bodies[Bi, 0].J]
-            self.M_inv_array[is_:ie, 0] = [self.Bodies[Bi, 0].m_inv, self.Bodies[Bi, 0].m_inv, self.Bodies[Bi, 0].J_inv]
+            self.M_array[is_:ie, 0] = [
+                self.Bodies[Bi, 0].m,
+                self.Bodies[Bi, 0].m,
+                self.Bodies[Bi, 0].J,
+            ]
+            self.M_inv_array[is_:ie, 0] = [
+                self.Bodies[Bi, 0].m_inv,
+                self.Bodies[Bi, 0].m_inv,
+                self.Bodies[Bi, 0].J_inv,
+            ]
         # %%% self.Points
         self.nP = len(self.Points)
         self.nPtot = self.nP
@@ -67,8 +118,12 @@ class DapSolver():
                 self.Points[Pi, 0].rP = self.Points[Pi, 0].sP
             for Bi in range(self.nB):
                 if int(self.Points[Pi, 0].Bindex) == int(Bi):
-                    length = len(self.Bodies[Bi, 0].pts)  # current length of pts - Assigned but never used
-                    self.Bodies[Bi, 0].pts = np.concatenate((self.Bodies[Bi, 0].pts, np.array([[Pi]])), axis=0)
+                    length = len(
+                        self.Bodies[Bi, 0].pts
+                    )  # current length of pts - Assigned but never used
+                    self.Bodies[Bi, 0].pts = np.concatenate(
+                        (self.Bodies[Bi, 0].pts, np.array([[Pi]])), axis=0
+                    )
         # %%% Unit vectors
         self.nU = len(self.Uvectors)
         for Vi in range(self.nU):
@@ -108,11 +163,13 @@ class DapSolver():
                 if self.Joints[Ji, 0].fix == 1:
                     self.Joints[Ji, 0].mrows = 3
                     if Bi == -1:
-                        self.Joints[Ji, 0].p0 = - self.Bodies[Bj, 0].p
+                        self.Joints[Ji, 0].p0 = -self.Bodies[Bj, 0].p
                     elif Bj == -1:
                         self.Joints[Ji, 0].p0 = self.Bodies[Bi, 0].p
                     else:
-                        self.Joints[Ji, 0].p0 = self.Bodies[Bi, 0].p - self.Bodies[Bj, 0].p
+                        self.Joints[Ji, 0].p0 = (
+                            self.Bodies[Bi, 0].p - self.Bodies[Bj, 0].p
+                        )
             elif self.Joints[Ji, 0].type == "tran":
                 self.Joints[Ji, 0].mrows = 2
                 self.Joints[Ji, 0].nbody = 2
@@ -125,14 +182,24 @@ class DapSolver():
                 if self.Joints[Ji, 0].fix == 1:
                     self.Joints[Ji, 0].mrows = 3
                     if Bi == -1:
-                        self.Joints[Ji, 0].p0 = np.linalg.norm(self.Points[Pi, 0].rP - self.Bodies[Bj, 0].r
-                                                               - self.Bodies[Bj, 0].A @ self.Points[Pj, 0].sPlocal)
+                        self.Joints[Ji, 0].p0 = np.linalg.norm(
+                            self.Points[Pi, 0].rP
+                            - self.Bodies[Bj, 0].r
+                            - self.Bodies[Bj, 0].A @ self.Points[Pj, 0].sPlocal
+                        )
                     elif Bj == -1:
-                        self.Joints[Ji, 0].p0 = np.linalg.norm(self.Bodies[Bi, 0].r + self.Bodies[Bi, 0].A @ self.Points[Pi, 0].sPlocal
-                                                               - self.Points[Pj, 0].rP)
+                        self.Joints[Ji, 0].p0 = np.linalg.norm(
+                            self.Bodies[Bi, 0].r
+                            + self.Bodies[Bi, 0].A @ self.Points[Pi, 0].sPlocal
+                            - self.Points[Pj, 0].rP
+                        )
                     else:
-                        self.Joints[Ji, 0].p0 = np.linalg.norm(self.Bodies[Bi, 0].r + self.Bodies[Bi, 0].A @ self.Points[Pi, 0].sPlocal
-                                                               - self.Bodies[Bj, 0].r - self.Bodies[Bj, 0].A @ self.Points[Pj, 0].sPlocal)
+                        self.Joints[Ji, 0].p0 = np.linalg.norm(
+                            self.Bodies[Bi, 0].r
+                            + self.Bodies[Bi, 0].A @ self.Points[Pi, 0].sPlocal
+                            - self.Bodies[Bj, 0].r
+                            - self.Bodies[Bj, 0].A @ self.Points[Pj, 0].sPlocal
+                        )
             elif self.Joints[Ji, 0].type == "rev-rev":
                 self.Joints[Ji, 0].mrows = 1
                 self.Joints[Ji, 0].nbody = 2
@@ -162,13 +229,17 @@ class DapSolver():
                 Bi = self.Joints[Ji, 0].iBindex
                 Bj = self.Joints[Ji, 0].jBindex
                 if Bi == -1:
-                    self.Joints[Ji, 0].d0 = -self.Bodies[Bj, 0].A.T @ self.Bodies[Bj, 0].r
+                    self.Joints[Ji, 0].d0 = (
+                        -self.Bodies[Bj, 0].A.T @ self.Bodies[Bj, 0].r
+                    )
                     self.Joints[Ji, 0].p0 = -self.Bodies[Bj, 0].p
                 elif Bj == -1:
                     self.Joints[Ji, 0].d0 = self.Bodies[Bi, 0].r
                     self.Joints[Ji, 0].p0 = self.Bodies[Bi, 0].p
                 else:
-                    self.Joints[Ji, 0].d0 = self.Bodies[Bj, 0].A.T @ (self.Bodies[Bi, 0].r - self.Bodies[Bj, 0].r)
+                    self.Joints[Ji, 0].d0 = self.Bodies[Bj, 0].A.T @ (
+                        self.Bodies[Bi, 0].r - self.Bodies[Bj, 0].r
+                    )
                     self.Joints[Ji, 0].p0 = self.Bodies[Bi, 0].p - self.Bodies[Bj, 0].p
         # %%% Functions
         # NOTE: TODO: Need to still properly port the functions
@@ -194,6 +265,7 @@ class DapSolver():
         #    # if Bj != -1:
         #        # self.Joints[Ji, 0].coljs = 3 * (Bj)
         #        # self.Joints[Ji, 0].colje = 3 * Bj + 1
+
     #  -------------------------------------------------------------------------
     # def u_to_Bodies(self, u):
     #    # for Bi in range(1,self.nB):

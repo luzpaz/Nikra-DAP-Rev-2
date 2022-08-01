@@ -1,11 +1,47 @@
-# *        -  Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>              *
-# *        -  Dewald Hattingh (UP) <u17082006@tuks.co.za>                            *
+# ************************************************************************************
+# *                                                                                  *
+# *   Copyright (c) 2022 Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>            *
+# *   Copyright (c) 2022 Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>   *
+# *   Copyright (c) 2022 Dewald Hattingh (UP) <u17082006@tuks.co.za>                 *
+# *   Copyright (c) 2022 Varnu Govender (UP) <govender.v@tuks.co.za>                 *
+# *   Copyright (c) 2022 Cecil Churms <churms@gmail.com>                             *
+# *                                                                                  *
+# *   This program is free software; you can redistribute it and/or modify           *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)             *
+# *   as published by the Free Software Foundation; either version 2 of              *
+# *   the License, or (at your option) any later version.                            *
+# *   for detail see the LICENCE text file.                                          *
+# *                                                                                  *
+# *   This program is distributed in the hope that it will be useful,                *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of                 *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  *
+# *   GNU Library General Public License for more details.                           *
+# *                                                                                  *
+# *   You should have received a copy of the GNU Library General Public              *
+# *   License along with this program; if not, write to the Free Software            *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307           *
+# *   USA                                                                            *
+# *_________________________________________________________________________________ *
+# *                                                                                  *
+# *     Nikra-DAP FreeCAD WorkBench (c) 2022:                                        *
+# *        - Please refer to the Documentation and README                            *
+# *          for more information regarding this WorkBench and its usage.            *
+# *                                                                                  *
+# *     Author(s) of this file:                                                      *
+# *          Alfred Bogaers (EX-MENTE) <alfred.bogaers@ex-mente.co.za>               *
+# *          Dewald Hattingh (UP) <u17082006@tuks.co.za>                             *
+# *          Lukas du Plessis (UP) <lukas.duplessis@up.ac.za>                        *
+# *          Cecil Churms <churms@gmail.com>                                         *
+# *                                                                                  *
+# ************************************************************************************
+
 import FreeCAD
 
 import os
 import DapTools
 from pivy import coin
 import Part
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -14,10 +50,8 @@ if FreeCAD.GuiUp:
 global Debug
 Debug = True
 
-BODY_TYPES = ["Ground",
-              "Moving"]
-BODY_TYPE_HELPER_TEXT = ["A fixed body which does not move.",
-                         "A free moving body."]
+BODY_TYPES = ["Ground", "Moving"]
+BODY_TYPE_HELPER_TEXT = ["A fixed body which does not move.", "A free moving body."]
 
 
 # -------------------------------------------------------------------------
@@ -37,31 +71,33 @@ class _CommandDapBody:
 
     #  -------------------------------------------------------------------------
     def GetResources(self):
-        """ Set up the menu text, the icon, and the tooltip """
+        """Called by FreeCAD when addCommand is run in InitGui.py
+        Returns a dictionary defining the icon, the menu text and the tooltip"""
 
-        return {'Pixmap': os.path.join(DapTools.get_module_path(),
-                                       "icons",
-                                       "Icon3.png"),
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Dap_Body_alias",
-                                                     "Body Definition"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Dap_Body_alias",
-                                                    "Creates and defines a body for the DAP analysis")}
+        return {
+            "Pixmap": os.path.join(DapTools.get_module_path(), "icons", "Icon3.png"),
+            "MenuText": QtCore.QT_TRANSLATE_NOOP("Dap_Body_alias", "Body Definition"),
+            "ToolTip": QtCore.QT_TRANSLATE_NOOP(
+                "Dap_Body_alias", "Creates and defines a body for the DAP analysis"
+            ),
+        }
 
     #  -------------------------------------------------------------------------
     def IsActive(self):
-        """ Determine if the command/icon must be active or greyed out """
+        """Determine if the command/icon must be active or greyed out"""
 
         return DapTools.getActiveContainer() is not None
 
     #  -------------------------------------------------------------------------
     def Activated(self):
-        """ Called when the Body Selection command is run """
+        """Called when the Body Selection command is run"""
 
         if Debug:
             FreeCAD.Console.PrintMessage("Running: Body Selection\n")
 
         import DapTools
         import DapBodySelection
+
         DapTools.getActiveContainer().addObject(DapBodySelection.makeDapBody())
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
@@ -79,13 +115,40 @@ class _DapBody:
     #  -------------------------------------------------------------------------
     def initProperties(self, obj):
         """ """
-        DapTools.addObjectProperty(obj, 'References', [], "App::PropertyStringList", "", "List of Parts")
-        DapTools.addObjectProperty(obj, 'BodyType', BODY_TYPES, "App::PropertyEnumeration", "", "Type of Body")
-        DapTools.addObjectProperty(obj, 'LinkedObjects', [], "App::PropertyLinkList", "", "Linked objects")
-        DapTools.addObjectProperty(obj, 'InitialHorizontal', "", "App::PropertySpeed", "", "Initial Velocity (Horizontal)")
-        DapTools.addObjectProperty(obj, 'InitialVertical', "", "App::PropertySpeed", "", "Initial Velocity (Vertical)")
-        DapTools.addObjectProperty(obj, 'InitialAngular', "", "App::PropertyQuantity", "", "Initial Velocity (Angular)")
-        obj.InitialAngular = FreeCAD.Units.Unit('rad/s')
+        DapTools.addObjectProperty(
+            obj, "References", [], "App::PropertyStringList", "", "List of Parts"
+        )
+        DapTools.addObjectProperty(
+            obj, "BodyType", BODY_TYPES, "App::PropertyEnumeration", "", "Type of Body"
+        )
+        DapTools.addObjectProperty(
+            obj, "LinkedObjects", [], "App::PropertyLinkList", "", "Linked objects"
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "InitialHorizontal",
+            "",
+            "App::PropertySpeed",
+            "",
+            "Initial Velocity (Horizontal)",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "InitialVertical",
+            "",
+            "App::PropertySpeed",
+            "",
+            "Initial Velocity (Vertical)",
+        )
+        DapTools.addObjectProperty(
+            obj,
+            "InitialAngular",
+            "",
+            "App::PropertyQuantity",
+            "",
+            "Initial Velocity (Angular)",
+        )
+        obj.InitialAngular = FreeCAD.Units.Unit("rad/s")
 
     #  -------------------------------------------------------------------------
     def onDocumentRestored(self, obj):
@@ -129,24 +192,24 @@ class _DapBody:
                 obj.setEditorMode("InitialHorizontal", 0)
                 obj.setEditorMode("InitialVertical", 0)
         # if prop == "References":
-            # #Determine if a single body has been referenced under multiple DapBody containers
-            # self.lstMultiRef = DapTools.getListOfBodyReferences()
-            # self.lstMultiRef_set = set(self.lstMultiRef)
-            # self.duplicateRef = len(self.lstMultiRef) != len(self.lstMultiRef_set)
-            # if self.duplicateRef == True:
-            #    # FreeCAD.Console.PrintWarning("\n The following elements have been defined under more than one DapBody:  \n")
-            #    # self.lstDuplicateRef = []
-            #    # self.viewed = set()
-            #    # for j in self.lstMultiRef:
-            #    #    # if j in self.viewed:
-            #    #        # self.lstDuplicateRef.append(j)
-            #    #    # else:
-            #    #        # self.viewed.add(j)
-            #    # #Provide the user with a list of objects that have been defined multiple times
-            #    # FreeCAD.Console.PrintError(set(self.lstDuplicateRef))
-            #    # FreeCAD.Console.PrintWarning("\n Check for redundant element definitions \n")
-            # else:
-            #    # FreeCAD.Console.PrintMessage("\n All DapBody definitions are uniquely defined \n")
+        # #Determine if a single body has been referenced under multiple DapBody containers
+        # self.lstMultiRef = DapTools.getListOfBodyReferences()
+        # self.lstMultiRef_set = set(self.lstMultiRef)
+        # self.duplicateRef = len(self.lstMultiRef) != len(self.lstMultiRef_set)
+        # if self.duplicateRef == True:
+        #    # FreeCAD.Console.PrintWarning("\n The following elements have been defined under more than one DapBody:  \n")
+        #    # self.lstDuplicateRef = []
+        #    # self.viewed = set()
+        #    # for j in self.lstMultiRef:
+        #    #    # if j in self.viewed:
+        #    #        # self.lstDuplicateRef.append(j)
+        #    #    # else:
+        #    #        # self.viewed.add(j)
+        #    # #Provide the user with a list of objects that have been defined multiple times
+        #    # FreeCAD.Console.PrintError(set(self.lstDuplicateRef))
+        #    # FreeCAD.Console.PrintWarning("\n Check for redundant element definitions \n")
+        # else:
+        #    # FreeCAD.Console.PrintMessage("\n All DapBody definitions are uniquely defined \n")
 
     #  -------------------------------------------------------------------------
     def __setstate__(self, state):
@@ -206,13 +269,14 @@ class _ViewProviderDapBody:
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCAD.Console.PrintError("Task dialog already active\n")
         return True
 
     #  -------------------------------------------------------------------------
     def setEdit(self, vobj, mode):
         """ """
         import _TaskPanelDapBody
+
         taskd = _TaskPanelDapBody.TaskPanelDapBody(self.Object)
         FreeCADGui.Control.showDialog(taskd)
         return True
